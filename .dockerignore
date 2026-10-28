@@ -1,0 +1,5 @@
+.env
+.env.*
+results/
+benchmark/bench/
+.git/

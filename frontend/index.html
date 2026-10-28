@@ -1,0 +1,3683 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Parity: COBOL to Java, verified</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    /* ================= themes ================= */
+    :root,
+    :root[data-theme="dark"] {
+      --bg: #1e1e1e;
+      --side: #252526;
+      --act: #333333;
+      --title: #3c3c3c;
+      --status: #007acc;
+      --status-fg: #fff;
+      --panel: #1e1e1e;
+      --border: #3a3a3a;
+      --fg: #cccccc;
+      --fg2: #9d9d9d;
+      --fg3: #6e6e6e;
+      --accent: #0e639c;
+      --accent-h: #1177bb;
+      --accent-fg: #fff;
+      --link: #3794ff;
+      --sel: #264f78;
+      --hl: #282828;
+      --tab: #2d2d2d;
+      --tab-on: #1e1e1e;
+      --input: #3c3c3c;
+      --hover: #2a2d2e;
+      --act-fg: #858585;
+      --act-on: #fff;
+      --ok: #89d185;
+      --err: #f48771;
+      --warn: #cca700;
+      --add-bg: rgba(35, 134, 54, .22);
+      --add-ch: rgba(35, 134, 54, .55);
+      --del-bg: rgba(218, 54, 51, .2);
+      --del-ch: rgba(218, 54, 51, .5);
+      --kw: #569cd6;
+      --dv: #c586c0;
+      --str: #ce9178;
+      --num: #b5cea8;
+      --cmt: #6a9955;
+      --pic: #dcdcaa;
+      --ty: #4ec9b0;
+      --lv: #858585;
+      --lv-on: #c6c6c6;
+      --shadow: rgba(0, 0, 0, .5);
+      --sel-fg: #fff;
+      --sel-sub: #dfe8f5;
+    }
+
+    :root[data-theme="light"] {
+      --bg: #ffffff;
+      --side: #f3f3f3;
+      --act: #2c2c2c;
+      --title: #dddddd;
+      --status: #007acc;
+      --status-fg: #fff;
+      --panel: #ffffff;
+      --border: #e0e0e0;
+      --fg: #333333;
+      --fg2: #616161;
+      --fg3: #8a8a8a;
+      --accent: #007acc;
+      --accent-h: #0062a3;
+      --accent-fg: #fff;
+      --link: #006ab1;
+      --sel: #add6ff;
+      --hl: #f3f6fb;
+      --tab: #ececec;
+      --tab-on: #ffffff;
+      --input: #ffffff;
+      --hover: #e8e8e8;
+      --act-fg: #9a9a9a;
+      --act-on: #fff;
+      --ok: #388a34;
+      --err: #c72e0f;
+      --warn: #bf8803;
+      --add-bg: rgba(155, 185, 85, .22);
+      --add-ch: rgba(155, 185, 85, .5);
+      --del-bg: rgba(255, 0, 0, .1);
+      --del-ch: rgba(255, 0, 0, .26);
+      --kw: #0000ff;
+      --dv: #af00db;
+      --str: #a31515;
+      --num: #098658;
+      --cmt: #008000;
+      --pic: #795e26;
+      --ty: #267f99;
+      --lv: #237893;
+      --lv-on: #0b216f;
+      --shadow: rgba(0, 0, 0, .25);
+      --sel-fg: #062f5b;
+      --sel-sub: #35577d;
+    }
+
+    :root[data-theme="monokai"] {
+      --bg: #272822;
+      --side: #1e1f1c;
+      --act: #1e1f1c;
+      --title: #1e1f1c;
+      --status: #49483e;
+      --status-fg: #f8f8f2;
+      --panel: #272822;
+      --border: #3e3d32;
+      --fg: #f8f8f2;
+      --fg2: #b3b3a6;
+      --fg3: #75715e;
+      --accent: #a6e22e;
+      --accent-h: #bdf04f;
+      --accent-fg: #1e1f1c;
+      --link: #66d9ef;
+      --sel: #49483e;
+      --hl: #3e3d32;
+      --tab: #1e1f1c;
+      --tab-on: #272822;
+      --input: #3e3d32;
+      --hover: #3e3d32;
+      --act-fg: #75715e;
+      --act-on: #f8f8f2;
+      --ok: #a6e22e;
+      --err: #f92672;
+      --warn: #e6db74;
+      --add-bg: rgba(166, 226, 46, .15);
+      --add-ch: rgba(166, 226, 46, .4);
+      --del-bg: rgba(249, 38, 114, .17);
+      --del-ch: rgba(249, 38, 114, .42);
+      --kw: #f92672;
+      --dv: #66d9ef;
+      --str: #e6db74;
+      --num: #ae81ff;
+      --cmt: #75715e;
+      --pic: #fd971f;
+      --ty: #a6e22e;
+      --lv: #90908a;
+      --lv-on: #f8f8f2;
+      --shadow: rgba(0, 0, 0, .55);
+      --sel-fg: #fff;
+      --sel-sub: #dfe8f5;
+    }
+
+    :root[data-theme="dracula"] {
+      --bg: #282a36;
+      --side: #21222c;
+      --act: #191a21;
+      --title: #21222c;
+      --status: #bd93f9;
+      --status-fg: #1e1f29;
+      --panel: #282a36;
+      --border: #44475a;
+      --fg: #f8f8f2;
+      --fg2: #bdc0d0;
+      --fg3: #6272a4;
+      --accent: #bd93f9;
+      --accent-h: #cdaafc;
+      --accent-fg: #1e1f29;
+      --link: #8be9fd;
+      --sel: #44475a;
+      --hl: #2f3142;
+      --tab: #21222c;
+      --tab-on: #282a36;
+      --input: #343746;
+      --hover: #343746;
+      --act-fg: #6272a4;
+      --act-on: #f8f8f2;
+      --ok: #50fa7b;
+      --err: #ff5555;
+      --warn: #f1fa8c;
+      --add-bg: rgba(80, 250, 123, .14);
+      --add-ch: rgba(80, 250, 123, .38);
+      --del-bg: rgba(255, 85, 85, .16);
+      --del-ch: rgba(255, 85, 85, .4);
+      --kw: #ff79c6;
+      --dv: #50fa7b;
+      --str: #f1fa8c;
+      --num: #bd93f9;
+      --cmt: #6272a4;
+      --pic: #ffb86c;
+      --ty: #8be9fd;
+      --lv: #6272a4;
+      --lv-on: #f8f8f2;
+      --shadow: rgba(0, 0, 0, .55);
+      --sel-fg: #fff;
+      --sel-sub: #dfe8f5;
+    }
+
+    :root[data-theme="tokyo"] {
+      --bg: #1a1b26;
+      --side: #16161e;
+      --act: #16161e;
+      --title: #16161e;
+      --status: #3d59a1;
+      --status-fg: #fff;
+      --panel: #1a1b26;
+      --border: #292e42;
+      --fg: #a9b1d6;
+      --fg2: #787c99;
+      --fg3: #565f89;
+      --accent: #7aa2f7;
+      --accent-h: #94b6ff;
+      --accent-fg: #16161e;
+      --link: #7dcfff;
+      --sel: #33467c;
+      --hl: #202330;
+      --tab: #16161e;
+      --tab-on: #1a1b26;
+      --input: #232433;
+      --hover: #202330;
+      --act-fg: #565f89;
+      --act-on: #c0caf5;
+      --ok: #9ece6a;
+      --err: #f7768e;
+      --warn: #e0af68;
+      --add-bg: rgba(158, 206, 106, .14);
+      --add-ch: rgba(158, 206, 106, .36);
+      --del-bg: rgba(247, 118, 142, .15);
+      --del-ch: rgba(247, 118, 142, .38);
+      --kw: #bb9af7;
+      --dv: #7dcfff;
+      --str: #9ece6a;
+      --num: #ff9e64;
+      --cmt: #565f89;
+      --pic: #e0af68;
+      --ty: #2ac3de;
+      --lv: #3b4261;
+      --lv-on: #a9b1d6;
+      --shadow: rgba(0, 0, 0, .55);
+      --sel-fg: #fff;
+      --sel-sub: #dfe8f5;
+    }
+
+    :root {
+      --ui: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "DejaVu Sans Mono", monospace;
+      --lh: 22px;
+      --panel-h: clamp(300px, 46vh, 520px);
+    }
+
+    /* ================= base ================= */
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font: 13px/1.45 var(--ui);
+      overflow: hidden;
+      -webkit-text-size-adjust: 100%
+    }
+
+    button,
+    select,
+    textarea,
+    input {
+      font: inherit;
+      color: inherit
+    }
+
+    button {
+      cursor: pointer;
+      background: none;
+      border: 0;
+      padding: 0
+    }
+
+    [hidden] {
+      display: none !important
+    }
+
+    :focus-visible {
+      outline: 1px solid var(--link);
+      outline-offset: -1px
+    }
+
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: color-mix(in srgb, var(--fg3) 55%, transparent) transparent
+    }
+
+    .sr {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap
+    }
+
+    .ide {
+      display: grid;
+      height: 100vh;
+      height: 100dvh;
+      min-height: 560px;
+      grid-template-columns: 48px var(--sbw, 244px) minmax(0, 1fr);
+      grid-template-rows: 32px minmax(0, 1fr) 24px;
+      grid-template-areas: "title title title" "act side main" "status status status"
+    }
+
+    .ide.nosb {
+      grid-template-columns: 48px 0 minmax(0, 1fr)
+    }
+
+    .ide.nosb .side {
+      display: none
+    }
+
+    /* title bar */
+    .title {
+      grid-area: title;
+      background: var(--title);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      font-size: 12px;
+      color: var(--fg2);
+      border-bottom: 1px solid var(--border)
+    }
+
+    .title .t-l,
+    .title .t-r {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 160px
+    }
+
+    .title .t-l {
+      min-width: 0;
+      flex: none
+    }
+
+    .title .t-c {
+      flex: 1;
+      text-align: center;
+      padding: 0 12px
+    }
+
+    .title .t-r {
+      justify-content: flex-end
+    }
+
+    .title .t-c {
+      color: var(--fg);
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .menubar {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-left: 6px
+    }
+
+    .mw {
+      position: relative
+    }
+
+    .mb {
+      padding: 3px 9px;
+      border-radius: 4px;
+      color: var(--fg2);
+      font-size: 12.5px
+    }
+
+    .mb:hover,
+    .mb.on {
+      background: var(--hover);
+      color: var(--fg)
+    }
+
+    .dd {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 3px;
+      min-width: 250px;
+      background: var(--side);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      box-shadow: 0 8px 28px var(--shadow);
+      padding: 4px;
+      z-index: 60
+    }
+
+    .mi {
+      display: flex;
+      justify-content: space-between;
+      gap: 28px;
+      width: 100%;
+      text-align: left;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: var(--fg)
+    }
+
+    .mi:hover {
+      background: var(--sel);
+      color: var(--sel-fg)
+    }
+
+    .mi kbd {
+      font: 400 11.5px var(--ui);
+      color: var(--fg2)
+    }
+
+    .mi:hover kbd {
+      color: var(--sel-sub)
+    }
+
+    .msep {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 6px
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--fg);
+      font-weight: 700;
+      letter-spacing: .01em
+    }
+
+    .themebtn {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 9px;
+      font-size: 12px;
+      color: var(--fg)
+    }
+
+    .themebtn:hover {
+      background: var(--hover)
+    }
+
+    /* activity bar */
+    .act {
+      grid-area: act;
+      background: var(--act);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 6px;
+      gap: 2px;
+      justify-content: space-between
+    }
+
+    .act .grp {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px
+    }
+
+    .ab {
+      width: 48px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      color: var(--act-fg);
+      position: relative
+    }
+
+    .ab:hover,
+    .ab[aria-pressed="true"] {
+      color: var(--act-on)
+    }
+
+    .ab[aria-pressed="true"]::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: var(--act-on)
+    }
+
+    .ab svg {
+      width: 24px;
+      height: 24px
+    }
+
+    /* sidebar */
+    .side {
+      grid-area: side;
+      background: var(--side);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      overflow: auto
+    }
+
+    .sh {
+      padding: 10px 18px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      color: var(--fg2);
+      text-transform: uppercase
+    }
+
+    .sect {
+      display: flex;
+      flex-direction: column
+    }
+
+    .sect>button.sx {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--fg);
+      width: 100%;
+      text-align: left
+    }
+
+    .sect>button.sx:hover {
+      background: var(--hover)
+    }
+
+    .chev {
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 5px solid currentColor;
+      transition: transform .12s
+    }
+
+    .sect.closed .chev {
+      transform: rotate(-90deg)
+    }
+
+    .sect.closed .sbody {
+      display: none
+    }
+
+    .file {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 3px 10px 3px 22px;
+      text-align: left;
+      font-size: 13px;
+      color: var(--fg)
+    }
+
+    .file:hover {
+      background: var(--hover)
+    }
+
+    .file[aria-current="true"] {
+      background: var(--sel);
+      color: var(--sel-fg)
+    }
+
+    .fi {
+      font: 700 9px/1 var(--mono);
+      letter-spacing: 0;
+      color: var(--accent);
+      border: 1px solid currentColor;
+      border-radius: 3px;
+      padding: 2px 3px;
+      flex: none
+    }
+
+    :root[data-theme="monokai"] .fi {
+      color: var(--kw)
+    }
+
+    .vbody {
+      padding: 8px 14px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px
+    }
+
+    .lbl {
+      font-size: 12px;
+      color: var(--fg2);
+      margin-bottom: 4px;
+      display: block
+    }
+
+    .radio {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 12.5px;
+      cursor: pointer;
+      padding: 2px 0
+    }
+
+    .radio input {
+      margin-top: 3px;
+      accent-color: var(--accent)
+    }
+
+    .radio small {
+      display: block;
+      color: var(--fg2);
+      font-size: 11.5px
+    }
+
+    .sel {
+      width: 100%;
+      background: var(--input);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 4px 6px
+    }
+
+    .btn {
+      background: var(--accent);
+      color: var(--accent-fg);
+      border-radius: 3px;
+      padding: 7px 12px;
+      font-weight: 600;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px
+    }
+
+    .btn:hover {
+      background: var(--accent-h)
+    }
+
+    .btn:disabled {
+      opacity: .6;
+      cursor: progress
+    }
+
+    .modelnote {
+      font-size: 11.5px;
+      color: var(--fg2);
+      line-height: 1.5
+    }
+
+    .modelnote b {
+      color: var(--fg);
+      font-weight: 600
+    }
+
+    .msg {
+      color: var(--err);
+      font-size: 12px
+    }
+
+    /* main */
+    .main {
+      grid-area: main;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0
+    }
+
+    .editors {
+      flex: 1;
+      min-height: 140px;
+      display: grid;
+      grid-template-columns: var(--cw, minmax(0, 1fr)) 1px minmax(0, 1fr)
+    }
+
+    .hsplit {
+      background: var(--border);
+      position: relative;
+      cursor: col-resize;
+      z-index: 3;
+      touch-action: none
+    }
+
+    .hsplit::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: -4px;
+      right: -4px
+    }
+
+    .hsplit:hover,
+    .hsplit.drag {
+      background: var(--link);
+      box-shadow: 0 0 0 1px var(--link)
+    }
+
+    .epane {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+      background: var(--bg)
+    }
+
+    .tabbar {
+      display: flex;
+      align-items: stretch;
+      background: var(--side);
+      height: 35px;
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+      flex: none
+    }
+
+    .tabs {
+      display: flex;
+      overflow-x: auto;
+      overflow-y: hidden;
+      flex: 1;
+      min-width: 0;
+      scrollbar-width: none
+    }
+
+    .tabs::-webkit-scrollbar {
+      display: none
+    }
+
+    .tab {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px 0 12px;
+      background: var(--tab);
+      color: var(--fg2);
+      border-right: 1px solid var(--border);
+      font-size: 13px;
+      white-space: nowrap;
+      position: relative;
+      flex: none
+    }
+
+    .tab:hover {
+      color: var(--fg)
+    }
+
+    .tab[aria-selected="true"] {
+      background: var(--tab-on);
+      color: var(--fg)
+    }
+
+    .tab[aria-selected="true"]::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 1px;
+      background: var(--link)
+    }
+
+    .tab .x {
+      width: 18px;
+      height: 18px;
+      border-radius: 3px;
+      display: grid;
+      place-items: center;
+      color: var(--fg2);
+      font-size: 15px;
+      line-height: 1
+    }
+
+    .tab .x:hover {
+      background: var(--hover);
+      color: var(--fg)
+    }
+
+    .tab .x .dot {
+      display: none;
+      font-size: 11px
+    }
+
+    .tab.dirty .x .dot {
+      display: block
+    }
+
+    .tab.dirty .x .cx {
+      display: none
+    }
+
+    .tab.dirty:hover .x .dot {
+      display: none
+    }
+
+    .tab.dirty:hover .x .cx {
+      display: block
+    }
+
+    .tabend {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 8px;
+      flex: none
+    }
+
+    .runb {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent);
+      color: var(--accent-fg);
+      border-radius: 3px;
+      padding: 4px 10px;
+      font-weight: 600;
+      font-size: 12.5px
+    }
+
+    .runb:hover {
+      background: var(--accent-h)
+    }
+
+    .runb:disabled {
+      opacity: .65;
+      cursor: progress
+    }
+
+    .runb kbd,
+    .btn kbd {
+      font: 500 10.5px var(--mono);
+      background: rgba(255, 255, 255, .18);
+      border-radius: 3px;
+      padding: 0 4px
+    }
+
+    .ghost {
+      color: var(--fg2);
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-size: 12px
+    }
+
+    .ghost:hover {
+      background: var(--hover);
+      color: var(--fg)
+    }
+
+    .ghost:disabled {
+      opacity: .4;
+      cursor: default;
+      background: none
+    }
+
+    .spin {
+      width: 11px;
+      height: 11px;
+      border: 2px solid rgba(255, 255, 255, .35);
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: sp .8s linear infinite
+    }
+
+    @keyframes sp {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    .crumbrow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex: none;
+      min-width: 0
+    }
+
+    .crumbrow .crumb {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap
+    }
+
+    .cact {
+      display: flex;
+      gap: 2px;
+      padding-right: 8px;
+      flex: none
+    }
+
+    .cact .ghost {
+      padding: 2px 8px
+    }
+
+    .crumb {
+      padding: 4px 14px;
+      font-size: 12px;
+      color: var(--fg2);
+      flex: none;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      min-height: 24px
+    }
+
+    .crumb b {
+      color: var(--fg);
+      font-weight: 500
+    }
+
+    /* code editor */
+    .code {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      background: var(--bg)
+    }
+
+    .gutter {
+      overflow: hidden;
+      padding: 12px 0;
+      text-align: right;
+      user-select: none;
+      font: 13.5px/var(--lh) var(--mono);
+      color: var(--lv);
+      min-width: 46px
+    }
+
+    .gutter div {
+      padding: 0 14px 0 14px;
+      height: var(--lh)
+    }
+
+    .gutter div.on {
+      color: var(--lv-on)
+    }
+
+    .stack {
+      position: relative;
+      overflow: hidden
+    }
+
+    .curline {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: var(--lh);
+      background: var(--hl);
+      border-top: 1px solid color-mix(in srgb, var(--fg3) 30%, transparent);
+      border-bottom: 1px solid color-mix(in srgb, var(--fg3) 30%, transparent);
+      pointer-events: none
+    }
+
+    .hl,
+    .ed {
+      position: absolute;
+      inset: 0;
+      margin: 0;
+      padding: 12px 16px;
+      font: 13.5px/var(--lh) var(--mono);
+      white-space: pre;
+      tab-size: 4;
+      letter-spacing: 0
+    }
+
+    .hl {
+      overflow: hidden;
+      pointer-events: none;
+      color: var(--fg);
+      padding-bottom: 80px;
+      padding-right: 80px
+    }
+
+    .ed {
+      overflow: auto;
+      border: 0;
+      resize: none;
+      background: transparent;
+      color: transparent;
+      caret-color: var(--fg);
+      outline: none
+    }
+
+    /* translucent so the highlighted code stays readable underneath a selection */
+    .ed::selection {
+      background: color-mix(in srgb, var(--link) 38%, transparent);
+      color: transparent
+    }
+
+    .jv::selection,
+    .jv *::selection {
+      background: color-mix(in srgb, var(--link) 40%, transparent)
+    }
+
+    .ed::placeholder {
+      color: var(--fg3)
+    }
+
+    .kw {
+      color: var(--kw)
+    }
+
+    .dv {
+      color: var(--dv);
+      font-weight: 600
+    }
+
+    .str {
+      color: var(--str)
+    }
+
+    .num {
+      color: var(--num)
+    }
+
+    .pic {
+      color: var(--pic)
+    }
+
+    .cmt {
+      color: var(--cmt);
+      font-style: italic
+    }
+
+    .lv {
+      color: var(--lv)
+    }
+
+    .ty {
+      color: var(--ty)
+    }
+
+    /* welcome */
+    .welcome {
+      flex: 1;
+      overflow: auto;
+      padding: 44px 48px
+    }
+
+    .wl {
+      max-width: 620px
+    }
+
+    .wl h1 {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1.1;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      color: var(--fg)
+    }
+
+    .wl h1 span {
+      color: var(--fg2);
+      font-weight: 600
+    }
+
+    .wl p {
+      color: var(--fg2);
+      font-size: 14px;
+      line-height: 1.6;
+      max-width: 56ch;
+      margin: 14px 0 0
+    }
+
+    .wl h3 {
+      margin: 30px 0 8px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--fg)
+    }
+
+    .wl ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px
+    }
+
+    .wl .lk {
+      color: var(--link);
+      font-size: 14px;
+      text-align: left;
+      padding: 2px 0
+    }
+
+    .wl .lk:hover {
+      text-decoration: underline
+    }
+
+    .wl ol {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--fg2);
+      font-size: 13.5px;
+      line-height: 1.7
+    }
+
+    .wl .fine {
+      font-size: 12.5px;
+      margin-top: 30px
+    }
+
+    kbd.k {
+      font: 500 11px var(--mono);
+      border: 1px solid var(--border);
+      border-bottom-width: 2px;
+      border-radius: 3px;
+      padding: 0 5px;
+      color: var(--fg2)
+    }
+
+    /* java view */
+    .jwrap {
+      outline: 0;
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      overflow: auto;
+      background: var(--bg)
+    }
+
+    .jwrap .gutter {
+      overflow: visible
+    }
+
+    .jv {
+      margin: 0;
+      padding: 12px 16px;
+      font: 13.5px/var(--lh) var(--mono);
+      white-space: pre;
+      color: var(--fg);
+      min-width: 0;
+      overflow: visible
+    }
+
+    .jempty {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      color: var(--fg3);
+      padding: 24px;
+      text-align: center;
+      font-size: 13px
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 1px 7px;
+      border-radius: 9px;
+      background: var(--input);
+      color: var(--fg2)
+    }
+
+    .badge.ok {
+      color: var(--ok)
+    }
+
+    .badge.no {
+      color: var(--err)
+    }
+
+    /* split + panel */
+    .vsplit {
+      height: 4px;
+      cursor: row-resize;
+      background: transparent;
+      flex: none;
+      margin: -2px 0;
+      position: relative;
+      z-index: 3
+    }
+
+    .vsplit:hover,
+    .vsplit.drag {
+      background: var(--link)
+    }
+
+    .panel {
+      height: var(--panel-h);
+      min-height: 110px;
+      display: flex;
+      flex-direction: column;
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+      flex: none
+    }
+
+    .ptabs {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 0 14px;
+      height: 35px;
+      flex: none;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .pt {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--fg2);
+      height: 100%;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 1px solid transparent;
+      margin-bottom: -1px
+    }
+
+    .pt:hover {
+      color: var(--fg)
+    }
+
+    .pt[aria-selected="true"] {
+      color: var(--fg);
+      border-bottom-color: var(--fg)
+    }
+
+    .cnt {
+      background: var(--accent);
+      color: var(--accent-fg);
+      border-radius: 9px;
+      padding: 0 6px;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0
+    }
+
+    .cnt.ok {
+      background: var(--ok);
+      color: #10210f
+    }
+
+    .cnt.no {
+      background: var(--err);
+      color: #2b0c06
+    }
+
+    .pbody {
+      flex: 1;
+      min-height: 0;
+      overflow: auto
+    }
+
+    .pbody>section {
+      padding: 12px 16px 16px
+    }
+
+    /* verification */
+    .vd {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      background: var(--side)
+    }
+
+    .vd b {
+      font-weight: 700
+    }
+
+    .vd.ok {
+      border-color: var(--ok);
+      background: color-mix(in srgb, var(--ok) 12%, transparent)
+    }
+
+    .vd.ok b {
+      color: var(--ok)
+    }
+
+    .vd.no {
+      border-color: var(--err);
+      background: color-mix(in srgb, var(--err) 12%, transparent)
+    }
+
+    .vd.no b {
+      color: var(--err)
+    }
+
+    .vd .sp {
+      flex: 1
+    }
+
+    .vd small {
+      color: var(--fg2);
+      font-size: 12px
+    }
+
+    .pipe {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 10px
+    }
+
+    .st {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12.5px;
+      color: var(--fg3)
+    }
+
+    .st .d {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 1.5px solid currentColor;
+      display: grid;
+      place-items: center;
+      font-size: 10px;
+      font-weight: 800;
+      flex: none
+    }
+
+    .st .n {
+      font-weight: 600
+    }
+
+    .st small {
+      color: var(--fg2);
+      font-size: 11.5px
+    }
+
+    .st.done {
+      color: var(--ok)
+    }
+
+    .st.done .n {
+      color: var(--fg)
+    }
+
+    .st.now {
+      color: var(--link)
+    }
+
+    .st.now .n {
+      color: var(--fg)
+    }
+
+    .st.now .d {
+      animation: pulse 1.1s ease-in-out infinite
+    }
+
+    .st.ok {
+      color: var(--ok)
+    }
+
+    .st.no {
+      color: var(--err)
+    }
+
+    .st.ok .n,
+    .st.no .n {
+      color: var(--fg)
+    }
+
+    .arrow {
+      color: var(--fg3);
+      font-size: 12px;
+      margin: 0 2px
+    }
+
+    @keyframes pulse {
+      50% {
+        opacity: .35
+      }
+    }
+
+    .atts {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 12px
+    }
+
+    .att {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 2px 9px;
+      font-size: 12px;
+      background: var(--side)
+    }
+
+    .att i {
+      font: 400 11.5px var(--mono);
+      color: var(--fg2);
+      font-style: normal
+    }
+
+    .att .g {
+      font-weight: 800
+    }
+
+    .att.ok .g {
+      color: var(--ok)
+    }
+
+    .att.no .g {
+      color: var(--err)
+    }
+
+    .att.cap .g {
+      color: var(--warn)
+    }
+
+    .att.wrk {
+      border-style: dashed
+    }
+
+    .itabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 8px;
+      flex-wrap: wrap
+    }
+
+    .pill {
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 2px 10px;
+      font-size: 12px;
+      color: var(--fg2)
+    }
+
+    .pill[aria-selected="true"] {
+      background: var(--sel);
+      color: var(--sel-fg);
+      border-color: transparent
+    }
+
+    .pill .g {
+      margin-left: 6px;
+      font-weight: 800
+    }
+
+    .pill .g.ok {
+      color: var(--ok)
+    }
+
+    .pill .g.no {
+      color: var(--err)
+    }
+
+    .diff {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: auto;
+      background: var(--bg);
+      font: 13px/20px var(--mono)
+    }
+
+    .dh {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-width: 620px;
+      position: sticky;
+      top: 0;
+      background: var(--side);
+      border-bottom: 1px solid var(--border);
+      z-index: 1;
+      font: 600 12px var(--ui);
+      color: var(--fg2)
+    }
+
+    .dh span {
+      padding: 5px 12px
+    }
+
+    .dh span+span {
+      border-left: 1px solid var(--border)
+    }
+
+    .dr {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-width: 620px
+    }
+
+    .dc {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr);
+      min-width: 0
+    }
+
+    .dc+.dc {
+      border-left: 1px solid var(--border)
+    }
+
+    .dn {
+      text-align: right;
+      padding: 0 10px;
+      color: var(--lv);
+      user-select: none;
+      font-size: 12px
+    }
+
+    .dt {
+      padding: 0 10px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      min-height: 20px
+    }
+
+    .dr.bad .dc:first-child {
+      background: var(--del-bg)
+    }
+
+    .dr.bad .dc:last-child {
+      background: var(--add-bg)
+    }
+
+    .dr.bad .dn {
+      color: var(--lv-on);
+      font-weight: 700
+    }
+
+    .dc:first-child .ch {
+      background: var(--del-ch);
+      border-radius: 2px
+    }
+
+    .dc:last-child .ch {
+      background: var(--add-ch);
+      border-radius: 2px
+    }
+
+    .dwait {
+      color: var(--fg3);
+      font-family: var(--ui);
+      font-style: italic
+    }
+
+    .cerr {
+      margin: 0;
+      padding: 10px 12px;
+      border-left: 3px solid var(--err);
+      background: var(--del-bg);
+      font: 12.5px/1.5 var(--mono);
+      white-space: pre-wrap;
+      color: var(--fg)
+    }
+
+    .cin {
+      margin: 8px 0 0;
+      font: 12px var(--mono);
+      color: var(--fg2)
+    }
+
+    .sumline {
+      font-size: 12.5px;
+      color: var(--fg2);
+      margin: 0 0 8px
+    }
+
+    /* inputs panel */
+    .inp {
+      display: grid;
+      grid-template-columns: 150px minmax(0, 1fr);
+      gap: 12px;
+      height: 100%
+    }
+
+    .ilist {
+      display: flex;
+      flex-direction: column;
+      gap: 2px
+    }
+
+    .ilist .it {
+      text-align: left;
+      padding: 4px 8px;
+      border-radius: 3px;
+      color: var(--fg2);
+      font-size: 12.5px
+    }
+
+    .ilist .it:hover {
+      background: var(--hover)
+    }
+
+    .ilist .it[aria-selected="true"] {
+      background: var(--sel);
+      color: var(--sel-fg)
+    }
+
+    .ilist .add {
+      color: var(--link);
+      text-align: left;
+      padding: 4px 8px;
+      font-size: 12.5px
+    }
+
+    .ilist .rm {
+      color: var(--fg2);
+      text-align: left;
+      padding: 4px 8px;
+      font-size: 12px;
+      text-decoration: underline;
+      text-underline-offset: 3px
+    }
+
+    .itext {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0
+    }
+
+    .itext textarea {
+      flex: 1;
+      min-height: 80px;
+      resize: none;
+      background: var(--input);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 8px 10px;
+      font: 13px/1.5 var(--mono)
+    }
+
+    .itext p {
+      margin: 0;
+      font-size: 12px;
+      color: var(--fg2)
+    }
+
+    /* terminal log */
+    .term {
+      font: 12.5px/1.65 var(--mono);
+      padding: 10px 16px 16px
+    }
+
+    .term .ln {
+      display: flex;
+      gap: 12px
+    }
+
+    .term .tm {
+      color: var(--fg3);
+      flex: none
+    }
+
+    .term .ok {
+      color: var(--ok)
+    }
+
+    .term .err {
+      color: var(--err)
+    }
+
+    .term .warn {
+      color: var(--warn)
+    }
+
+    .term .dim {
+      color: var(--fg2)
+    }
+
+    .term .prompt {
+      color: var(--link)
+    }
+
+    .term .live {
+      margin-left: 8px;
+      color: var(--fg2)
+    }
+
+    .caret {
+      display: inline-block;
+      width: .55em;
+      height: 1em;
+      background: var(--fg);
+      vertical-align: text-bottom;
+      animation: blink 1s steps(1) infinite
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0
+      }
+    }
+
+    .empty {
+      color: var(--fg3);
+      font-size: 13px;
+      padding: 6px 0
+    }
+
+    /* status bar */
+    .status {
+      grid-area: status;
+      background: var(--status);
+      color: var(--status-fg);
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      padding: 0 4px;
+      overflow: hidden;
+      white-space: nowrap
+    }
+
+    .status .si {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 8px;
+      height: 100%
+    }
+
+    .status button.si:hover {
+      background: rgba(255, 255, 255, .16)
+    }
+
+    .status .grow {
+      flex: 1
+    }
+
+    .status b {
+      font-weight: 600;
+      font-family: var(--mono);
+      font-size: 11.5px
+    }
+
+    .led {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: .55
+    }
+
+    .led.busy {
+      opacity: 1;
+      animation: pulse 1s ease-in-out infinite
+    }
+
+    .led.ok {
+      opacity: 1
+    }
+
+    .led.no {
+      opacity: 1
+    }
+
+    /* quick pick */
+    .qp-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: none
+    }
+
+    .qp-bg.open {
+      display: block
+    }
+
+    .qp {
+      position: absolute;
+      top: 36px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(560px, calc(100vw - 24px));
+      background: var(--side);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      box-shadow: 0 8px 28px var(--shadow);
+      overflow: hidden
+    }
+
+    .qp input {
+      width: 100%;
+      background: var(--input);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      margin: 8px;
+      width: calc(100% - 16px);
+      padding: 6px 8px;
+      outline: 1px solid transparent
+    }
+
+    .qp input:focus {
+      outline-color: var(--link)
+    }
+
+    .qp .qh {
+      padding: 0 12px 4px;
+      font-size: 11.5px;
+      color: var(--fg2)
+    }
+
+    .qp ul {
+      list-style: none;
+      margin: 0;
+      padding: 0 0 6px;
+      max-height: 300px;
+      overflow: auto
+    }
+
+    .qp li {
+      padding: 5px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-size: 13px
+    }
+
+    .qp li[aria-selected="true"] {
+      background: var(--sel);
+      color: var(--sel-fg)
+    }
+
+    .qp li small {
+      color: var(--fg2)
+    }
+
+    .qp li[aria-selected="true"] small {
+      color: var(--sel-sub)
+    }
+
+    /* toasts */
+    .toasts {
+      position: fixed;
+      right: 14px;
+      bottom: 34px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 40;
+      width: min(380px, calc(100vw - 28px))
+    }
+
+    .toast {
+      background: var(--side);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--link);
+      border-radius: 4px;
+      padding: 10px 12px;
+      box-shadow: 0 4px 18px var(--shadow);
+      font-size: 13px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      animation: tin .18s ease-out
+    }
+
+    .toast.ok {
+      border-left-color: var(--ok)
+    }
+
+    .toast.no {
+      border-left-color: var(--err)
+    }
+
+    .toast .tx {
+      flex: 1
+    }
+
+    .toast .tx b {
+      display: block;
+      margin-bottom: 2px
+    }
+
+    .toast .tx span {
+      color: var(--fg2);
+      font-size: 12.5px
+    }
+
+    .toast .cl {
+      color: var(--fg2);
+      font-size: 16px;
+      line-height: 1
+    }
+
+    @keyframes tin {
+      from {
+        opacity: 0;
+        transform: translateY(8px)
+      }
+    }
+
+
+    /* folder explorer */
+    .fold-head {
+      padding: 6px 12px 8px;
+      font-size: 12px;
+      color: var(--fg2);
+      display: flex;
+      flex-direction: column;
+      gap: 6px
+    }
+
+    .fold-head b {
+      color: var(--fg);
+      font-weight: 600;
+      word-break: break-all
+    }
+
+    .fold-act {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap
+    }
+
+    .btn.sm {
+      padding: 4px 9px;
+      font-size: 12px;
+      flex: 1;
+      white-space: nowrap
+    }
+
+    .btn.alt {
+      background: var(--input);
+      color: var(--fg)
+    }
+
+    .btn.alt:hover {
+      background: var(--hover)
+    }
+
+    .btn.alt:disabled {
+      opacity: .45;
+      cursor: default
+    }
+
+    .fsum {
+      font-size: 11.5px;
+      color: var(--fg2);
+      line-height: 1.5
+    }
+
+    .fsum .ok {
+      color: var(--ok)
+    }
+
+    .fsum .no {
+      color: var(--err)
+    }
+
+    .fnote {
+      font-size: 11px;
+      color: var(--fg3);
+      line-height: 1.45
+    }
+
+    .fdir {
+      padding: 2px 10px 2px calc(10px + var(--d, 0)*12px);
+      font-size: 12px;
+      color: var(--fg2);
+      display: flex;
+      gap: 6px;
+      align-items: center
+    }
+
+    .file.tr {
+      padding-left: calc(22px + var(--d, 0)*12px)
+    }
+
+    .file.cp {
+      color: var(--fg3)
+    }
+
+    .file .nm {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .fs {
+      margin-left: auto;
+      font: 700 12px/1 var(--mono);
+      width: 14px;
+      text-align: center;
+      flex: none
+    }
+
+    .fs.ok {
+      color: var(--ok)
+    }
+
+    .fs.no {
+      color: var(--err)
+    }
+
+    .fs.sk {
+      color: var(--fg3)
+    }
+
+    .fs.run::after {
+      content: "";
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border: 2px solid var(--fg3);
+      border-top-color: var(--link);
+      border-radius: 50%;
+      animation: sp .8s linear infinite
+    }
+
+    /* assistant dock */
+    .chat {
+      grid-area: chat;
+      display: none;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+      background: var(--side);
+      border-left: 1px solid var(--border)
+    }
+
+    .ide.chat-open {
+      grid-template-columns: 48px var(--sbw, 244px) minmax(0, 1fr) var(--chw, 390px);
+      grid-template-areas: "title title title title" "act side main chat" "status status status status"
+    }
+
+    .ide.nosb.chat-open {
+      grid-template-columns: 48px 0 minmax(0, 1fr) var(--chw, 390px)
+    }
+
+    .ide.chat-open .chat {
+      display: flex
+    }
+
+    .ch-h {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--fg2)
+    }
+
+    .ch-h .sp {
+      flex: 1
+    }
+
+    .ch-h .ghost {
+      text-transform: none;
+      letter-spacing: 0;
+      font-weight: 400
+    }
+
+    .ch-msgs {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px
+    }
+
+    .ch-empty {
+      color: var(--fg2);
+      font-size: 12.5px;
+      line-height: 1.55
+    }
+
+    .ch-empty b {
+      color: var(--fg)
+    }
+
+    .cm {
+      max-width: 100%;
+      font-size: 13px;
+      line-height: 1.55;
+      overflow-wrap: anywhere
+    }
+
+    .cm.u {
+      align-self: flex-end;
+      background: var(--accent);
+      color: var(--accent-fg);
+      padding: 6px 10px;
+      border-radius: 8px 8px 2px 8px;
+      max-width: 92%;
+      white-space: pre-wrap
+    }
+
+    .cm.a p {
+      margin: 0 0 8px
+    }
+
+    .cm.a p:last-child {
+      margin-bottom: 0
+    }
+
+    .cm.a ul,
+    .cm.a ol {
+      margin: 0 0 8px;
+      padding-left: 20px
+    }
+
+    .cm code.ic {
+      font: 12px var(--mono);
+      background: var(--input);
+      padding: 1px 4px;
+      border-radius: 3px
+    }
+
+    .cm .err {
+      color: var(--err)
+    }
+
+    .cm .meta {
+      font-size: 11px;
+      color: var(--fg3);
+      margin-top: 4px
+    }
+
+    .cb {
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      background: var(--bg);
+      margin: 6px 0;
+      overflow: hidden
+    }
+
+    .cb-h {
+      display: flex;
+      gap: 4px 6px;
+      align-items: center;
+      padding: 4px 8px;
+      background: var(--hover);
+      font-size: 11.5px;
+      color: var(--fg2);
+      flex-wrap: wrap
+    }
+
+    .cb-h .sp {
+      flex: 1
+    }
+
+    .cb-h .ghost {
+      font-size: 11.5px
+    }
+
+    .cb pre {
+      margin: 0;
+      padding: 8px 10px;
+      overflow: auto;
+      max-height: 300px;
+      font: 12px/1.5 var(--mono);
+      white-space: pre;
+      color: var(--fg)
+    }
+
+    .ch-chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      padding: 0 12px 8px
+    }
+
+    .chip {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 3px 10px;
+      font-size: 12px;
+      color: var(--fg2)
+    }
+
+    .chip:hover {
+      background: var(--hover);
+      color: var(--fg)
+    }
+
+    .ch-in {
+      border-top: 1px solid var(--border);
+      padding: 8px 12px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px
+    }
+
+    .ch-in textarea {
+      width: 100%;
+      resize: none;
+      min-height: 56px;
+      max-height: 170px;
+      background: var(--input);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 6px 8px
+    }
+
+    .ch-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      font-size: 12px;
+      color: var(--fg2)
+    }
+
+    .ch-row label {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      cursor: pointer
+    }
+
+    .ch-row .sp {
+      flex: 1
+    }
+
+    .ch-row .btn {
+      padding: 5px 14px
+    }
+
+    .dots::after {
+      content: "";
+      display: inline-block;
+      width: 1.2em;
+      text-align: left;
+      animation: dots 1.2s steps(4, end) infinite
+    }
+
+    @keyframes dots {
+      0% {
+        content: ""
+      }
+
+      25% {
+        content: "."
+      }
+
+      50% {
+        content: ".."
+      }
+
+      75% {
+        content: "..."
+      }
+    }
+
+    /* ================= small screens ================= */
+    @media (max-width:900px) {
+
+      html,
+      body {
+        height: auto
+      }
+
+      body {
+        overflow: auto
+      }
+
+      .ide {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        min-height: 0
+      }
+
+      .title .t-c,
+      .title .t-r .hint {
+        display: none
+      }
+
+      .act {
+        flex-direction: row;
+        height: 40px;
+        padding: 0 6px;
+        justify-content: flex-start;
+        width: 100%
+      }
+
+      .act .grp {
+        flex-direction: row
+      }
+
+      .ab {
+        width: 44px;
+        height: 40px
+      }
+
+      .ab[aria-pressed="true"]::before {
+        display: none
+      }
+
+      .side {
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+        overflow: visible
+      }
+
+      .ide.nosb .side {
+        display: none
+      }
+
+      .main {
+        display: block
+      }
+
+      .editors {
+        display: flex;
+        flex-direction: column
+      }
+
+      .epane {
+        min-height: 0
+      }
+
+      .code {
+        height: 340px;
+        flex: none
+      }
+
+      .welcome {
+        max-height: none
+      }
+
+      .hsplit {
+        display: none
+      }
+
+      .epane+.hsplit+.epane {
+        border-top: 1px solid var(--border);
+        min-height: 240px
+      }
+
+      .menubar {
+        display: none
+      }
+
+      .panel {
+        height: auto;
+        min-height: 260px
+      }
+
+      .vsplit {
+        display: none
+      }
+
+      .welcome {
+        padding: 24px 18px
+      }
+
+      .inp {
+        grid-template-columns: 1fr
+      }
+
+      .status {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 4px
+      }
+
+      .status .si {
+        height: 20px
+      }
+
+      .chat {
+        border-left: 0;
+        border-top: 1px solid var(--border);
+        height: 520px
+      }
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+      * {
+        animation: none !important;
+        transition: none !important
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="ide" id="ide">
+    <header class="title">
+      <div class="t-l"><span class="logo"><svg width="16" height="16" viewBox="0 0 26 26" aria-hidden="true">
+            <rect x="2" y="5" width="22" height="6" rx="1" fill="currentColor" />
+            <rect x="2" y="15" width="22" height="6" rx="1" fill="var(--ok)" />
+          </svg>Parity</span>
+        <nav class="menubar" id="menubar" aria-label="Menu"></nav>
+      </div>
+      <div class="t-c" id="titleC">Parity</div>
+      <div class="t-r"><button class="themebtn" id="themeTop" type="button"
+          title="Change color theme (Ctrl+K Ctrl+T)">Theme: <span id="themeName">Dark+</span></button></div>
+    </header>
+
+    <nav class="act" aria-label="Activity bar">
+      <div class="grp">
+        <button class="ab" id="abExp" type="button" aria-pressed="true" title="Explorer" aria-label="Toggle sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z" />
+            <path d="M14 3v5h5" />
+          </svg>
+        </button>
+        <button class="ab" id="abChat" type="button" aria-pressed="false" title="AI assistant (Ctrl+Alt+A)"
+          aria-label="Toggle AI assistant">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+            <path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H10l-4 3.5V17H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z" />
+            <path d="M8 10h8M8 13h5" />
+          </svg>
+        </button>
+        <button class="ab" id="abRun" type="button" title="Verify translation (Ctrl+Enter)"
+          aria-label="Verify translation">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+            <path d="M7 4.5v15l12-7.5z" />
+          </svg>
+        </button>
+      </div>
+      <div class="grp">
+        <button class="ab" id="abTheme" type="button" title="Color theme" aria-label="Color theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <aside class="side" id="side" aria-label="Sidebar">
+      <div class="sh">Explorer</div>
+      <div class="sect" id="sectSamples">
+        <button class="sx" type="button" data-sect="sectSamples"><span class="chev"></span>Files</button>
+        <div class="sbody" id="fileList"></div>
+      </div>
+      <div class="sect" id="sectVerify">
+        <button class="sx" type="button" data-sect="sectVerify"><span class="chev"></span>Verify</button>
+        <div class="sbody vbody">
+          <button class="btn" id="sideRun" type="button"><span id="sideRunLbl">Verify
+              translation</span><kbd>Ctrl+Enter</kbd></button>
+          <p class="msg" id="msg" role="status"></p>
+          <div class="modelnote" id="models"></div>
+        </div>
+      </div>
+      <div class="sect" id="sectFolder" hidden>
+        <button class="sx" type="button" data-sect="sectFolder"><span class="chev"></span>Folder</button>
+        <div class="sbody" id="folderBody"></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="editors">
+        <section class="epane" aria-label="COBOL editor">
+          <div class="tabbar">
+            <div class="tabs" id="tabs" role="tablist"></div>
+            <div class="tabend"><button class="runb" id="runb" type="button"><span
+                  id="runLbl">Verify</span><kbd>Ctrl+Enter</kbd></button></div>
+          </div>
+          <div class="crumbrow">
+            <div class="crumb" id="crumb"></div>
+            <div class="cact"><button class="ghost" id="cCopy" type="button"
+                title="Copy the selection, or the whole file if nothing is selected">Copy</button><button class="ghost"
+                id="cPaste" type="button" title="Paste at the cursor">Paste</button></div>
+          </div>
+          <div class="welcome" id="welcome" hidden>
+            <div class="wl">
+              <h1>Two programs.<br><span>One answer.</span></h1>
+              <p>Parity translates COBOL to Java, runs both on the same inputs, and revises the Java until every line of
+                output matches.</p>
+              <h3>Start</h3>
+              <ul>
+                <li><button class="lk" id="wNew" type="button">New COBOL file</button></li>
+                <li><button class="lk" id="wOpen" type="button">Open file&hellip; <kbd class="k">Ctrl</kbd> <kbd
+                      class="k">O</kbd></button></li>
+                <li><button class="lk" id="wFolder" type="button">Open folder&hellip;</button></li>
+                <li><button class="lk" id="wChat" type="button">Ask the assistant <kbd class="k">Ctrl</kbd> <kbd
+                      class="k">Alt</kbd> <kbd class="k">A</kbd></button></li>
+                <li><button class="lk" id="wRun" type="button">Verify the open file <kbd class="k">Ctrl</kbd> <kbd
+                      class="k">Enter</kbd></button></li>
+                <li><button class="lk" id="wTheme" type="button">Choose a color theme <kbd class="k">Ctrl</kbd> <kbd
+                      class="k">K</kbd> <kbd class="k">Ctrl</kbd> <kbd class="k">T</kbd></button></li>
+              </ul>
+              <h3>Whole folders</h3>
+              <p>Open a folder to list every COBOL file in the Explorer, then press Convert all. Each file is translated
+                and checked as its own program, one after another. COPY statements are filled in from copybooks in the
+                same folder. A file NAME.in beside NAME.cob is used as its test input. Programs that use CALL are
+                skipped.</p>
+              <h3>Use your own code</h3>
+              <p>Create a new file and paste your COBOL program over the starter code, or open a .cob file from your
+                computer (you can also drag one onto the window). Add test inputs if the program reads input, then press
+                Ctrl+Enter. Ctrl+S saves the file.</p>
+              <h3>How it works</h3>
+              <ol>
+                <li>The COBOL program runs first. Its output is the answer key.</li>
+                <li>A model writes Java for the same program.</li>
+                <li>Both outputs are compared line by line.</li>
+                <li>If they differ, the model sees the difference and tries again.</li>
+              </ol>
+              <p class="fine">A match means identical output on the inputs you supply, with the original COBOL program's
+                output as the answer key. That is differential testing, not a formal proof.</p>
+            </div>
+          </div>
+          <div class="code" id="codeWrap">
+            <div class="gutter" id="gutter" aria-hidden="true"></div>
+            <div class="stack">
+              <div class="curline" id="curline"></div>
+              <pre class="hl" id="hl" aria-hidden="true"></pre>
+              <textarea class="ed" id="cobol" spellcheck="false" wrap="off" autocapitalize="off" autocomplete="off"
+                aria-label="COBOL source code" placeholder="Paste a COBOL program here"></textarea>
+            </div>
+          </div>
+        </section>
+
+        <div class="hsplit" id="hsplit" role="separator" aria-orientation="vertical"
+          aria-label="Resize editors (double-click to reset)" tabindex="0"></div>
+
+        <section class="epane" aria-label="Generated Java">
+          <div class="tabbar">
+            <div class="tabs">
+              <div class="tab" role="tab" aria-selected="true"><span class="fi"
+                  style="color:var(--ty)">JAVA</span>Main.java <span class="badge" id="jbadge">generated</span></div>
+            </div>
+
+          </div>
+          <div class="crumbrow">
+            <div class="crumb"><span>Parity</span><span>&rsaquo;</span><b>Main.java</b><span>(read only)</span></div>
+            <div class="cact"><button class="ghost" id="copy" type="button" disabled
+                title="Copy the selection, or the whole Java file if nothing is selected">Copy</button><button
+                class="ghost" id="dl" type="button" disabled title="Download Main.java">Save .java</button></div>
+          </div>
+          <div class="jempty" id="jempty">Generated Java appears here after you verify a program.</div>
+          <div class="jwrap" id="jwrap" tabindex="0" hidden>
+            <div class="gutter" id="jgut" aria-hidden="true"></div>
+            <pre class="jv" id="jv"></pre>
+          </div>
+        </section>
+      </div>
+
+      <div class="vsplit" id="vsplit" role="separator" aria-orientation="horizontal" aria-label="Resize panel"></div>
+
+      <section class="panel" aria-label="Panel">
+        <div class="ptabs" role="tablist">
+          <button class="pt" role="tab" id="pt-ver" data-p="ver" aria-selected="true">Verification <span class="cnt"
+              id="cntVer" hidden></span></button>
+          <button class="pt" role="tab" id="pt-in" data-p="in" aria-selected="false">Test inputs <span class="cnt"
+              id="cntIn">1</span></button>
+          <button class="pt" role="tab" id="pt-log" data-p="log" aria-selected="false">Run log</button>
+          <button class="ghost" id="clearRes" type="button" style="margin-left:auto"
+            title="Clear the results shown for this file">Clear</button>
+        </div>
+        <div class="pbody" id="pbody">
+          <section id="p-ver" role="tabpanel"></section>
+          <section id="p-in" role="tabpanel" hidden>
+            <div class="inp">
+              <div class="ilist" id="ilist"></div>
+              <div class="itext"><textarea id="inTa" spellcheck="false"
+                  aria-label="Standard input for the selected test"
+                  placeholder="Standard input for this test (optional)"></textarea>
+                <p>What the program reads from standard input. Leave empty if it reads nothing. More inputs make a
+                  stronger check.</p>
+              </div>
+            </div>
+          </section>
+          <section id="p-log" role="tabpanel" hidden>
+            <div class="term" id="term"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <aside class="chat" id="chat" aria-label="AI assistant">
+      <div class="ch-h"><span>Assistant</span><span class="sp"></span><button class="ghost" id="chClear" type="button"
+          title="Start a new conversation">Clear</button><button class="ghost" id="chClose" type="button"
+          aria-label="Close assistant">&times;</button></div>
+      <div class="ch-msgs" id="chMsgs" aria-live="polite"></div>
+      <div class="ch-chips" id="chChips"></div>
+      <div class="ch-in">
+        <textarea id="chIn" rows="2" spellcheck="true" aria-label="Message the assistant"
+          placeholder="Ask about this code, or ask for a change. Enter sends, Shift+Enter adds a line."></textarea>
+        <div class="ch-row"><label title="Let the model reason before it answers. Slower."><input type="checkbox"
+              id="chThink"> Think harder</label><span class="sp"></span><button class="ghost" id="chStop" type="button"
+            hidden>Stop</button><button class="btn" id="chSend" type="button">Send</button></div>
+      </div>
+    </aside>
+
+    <footer class="status" aria-live="polite">
+      <span class="si"><span class="led" id="led"></span><span id="sbState">Ready</span></span>
+      <span class="si">Attempts <b id="sbAtt">0</b></span>
+      <span class="si">Tokens out <b id="sbTok">0</b></span>
+      <span class="si">Time <b id="sbTime">0.0s</b></span>
+      <span class="grow"></span>
+      <span class="si" id="sbPos">Ln 1, Col 1</span>
+      <span class="si">Spaces: 4</span>
+      <span class="si">COBOL</span>
+      <button class="si" id="sbTheme" type="button" title="Change color theme">Theme: <span
+          id="sbThemeName">Dark+</span></button>
+    </footer>
+  </div>
+
+  <div class="qp-bg" id="qpBg">
+    <div class="qp" role="dialog" aria-label="Select color theme"><input id="qpIn"
+        placeholder="Select Color Theme (up/down to preview)" aria-label="Filter themes" autocomplete="off">
+      <div class="qh">Color themes</div>
+      <ul id="qpList" role="listbox"></ul>
+    </div>
+  </div>
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+  <input type="file" id="dirIn" webkitdirectory multiple hidden>
+  <input type="file" id="fileIn" accept=".cob,.cbl,.cobol,.cpy,.txt" multiple hidden>
+
+  <script>
+    "use strict";
+    const $ = (id) => document.getElementById(id);
+    const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; };
+    const nf = new Intl.NumberFormat("en-US");
+    let busy = false;
+
+    /* ================= themes ================= */
+    const THEMES = [["dark", "Dark+", "default dark"], ["light", "Light+", "default light"], ["monokai", "Monokai", "dark"], ["dracula", "Dracula", "dark"], ["tokyo", "Tokyo Night", "dark"]];
+    const themeName = (id) => (THEMES.find((t) => t[0] === id) || THEMES[0])[1];
+    function applyTheme(id) {
+      document.documentElement.dataset.theme = id;
+      $("themeName").textContent = $("sbThemeName").textContent = themeName(id);
+    }
+    let theme = "dark";
+    try { const t = localStorage.getItem("parity.theme"); if (THEMES.some((x) => x[0] === t)) theme = t; } catch (e) { }
+    applyTheme(theme);
+
+    const qp = { open: false, idx: 0, list: THEMES, before: "dark" };
+    function qpRender() {
+      const ul = $("qpList"); ul.replaceChildren();
+      qp.list.forEach((t, i) => {
+        const li = el("li"); li.setAttribute("role", "option"); li.setAttribute("aria-selected", String(i === qp.idx));
+        li.append(el("span", "", t[1]), el("small", "", t[2] + (t[0] === theme ? " (current)" : "")));
+        li.onmouseenter = () => { qp.idx = i; applyTheme(t[0]);[...ul.children].forEach((c, k) => c.setAttribute("aria-selected", String(k === i))); };
+        li.onclick = () => qpCommit();
+        ul.append(li);
+      });
+    }
+    function qpOpen() {
+      qp.open = true; qp.before = document.documentElement.dataset.theme; qp.list = THEMES;
+      qp.idx = Math.max(0, THEMES.findIndex((t) => t[0] === qp.before));
+      $("qpIn").value = ""; $("qpBg").classList.add("open"); qpRender(); $("qpIn").focus();
+    }
+    function qpClose(revert) {
+      if (!qp.open) return;
+      qp.open = false; $("qpBg").classList.remove("open");
+      if (revert) applyTheme(qp.before);
+    }
+    function qpCommit() {
+      const t = qp.list[qp.idx]; if (!t) return qpClose(true);
+      theme = t[0]; applyTheme(theme); try { localStorage.setItem("parity.theme", theme); } catch (e) { } qpClose(false);
+    }
+    $("qpIn").addEventListener("input", (e) => {
+      const q = e.target.value.toLowerCase();
+      qp.list = THEMES.filter((t) => t[1].toLowerCase().includes(q)); qp.idx = 0; qpRender();
+      if (qp.list[0]) applyTheme(qp.list[0][0]);
+    });
+    $("qpIn").addEventListener("keydown", (e) => {
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault(); if (!qp.list.length) return;
+        qp.idx = (qp.idx + (e.key === "ArrowDown" ? 1 : -1) + qp.list.length) % qp.list.length;
+        applyTheme(qp.list[qp.idx][0]); qpRender();
+      } else if (e.key === "Enter") { e.preventDefault(); qpCommit(); }
+      else if (e.key === "Escape") { e.preventDefault(); qpClose(true); }
+    });
+    $("qpBg").addEventListener("mousedown", (e) => { if (e.target === $("qpBg")) qpClose(true); });
+    ["themeTop", "abTheme", "sbTheme", "wTheme"].forEach((id) => $(id).addEventListener("click", qpOpen));
+
+    /* ================= syntax highlighting (tokens become spans; text is never parsed as HTML) ================= */
+    const COBOL_KW = new Set(("ACCEPT ADD AND AT BY CALL COMPUTE CONTINUE DISPLAY DIVIDE ELSE END-ADD END-COMPUTE END-DIVIDE END-EVALUATE END-IF END-MULTIPLY END-PERFORM " +
+      "END-READ END-SUBTRACT END-WRITE EVALUATE EXIT FROM GIVING GO IF INTO MOVE MULTIPLY NOT OCCURS OR PERFORM READ REMAINDER ROUNDED STOP RUN SUBTRACT THEN THRU TIMES TO UNTIL " +
+      "USING VALUE VARYING WHEN WRITE WITH SIZE ERROR INSPECT TALLYING REPLACING STRING UNSTRING DELIMITED INITIALIZE SET SEARCH ON OF IN IS ZERO ZEROS SPACES SPACE PROGRAM-ID " +
+      "REDEFINES COMP COMP-3 USAGE BLANK OTHER ALSO AFTER BEFORE ADVANCING").split(" "));
+    function span(f, c, t) { if (!t) return; if (c) { const s = document.createElement("span"); s.className = c; s.textContent = t; f.appendChild(s); } else f.appendChild(document.createTextNode(t)); }
+    function cobolLine(line, f) {
+      if (line.length > 6 && line[6] === "*") return span(f, "cmt", line);
+      const dv = /^(\s*)([A-Za-z][A-Za-z0-9-]*\s+(?:DIVISION|SECTION)\b\.?)(.*)$/i.exec(line);
+      if (dv) { span(f, "", dv[1]); span(f, "dv", dv[2]); return span(f, "", dv[3]); }
+      const re = /(\*>.*$)|("[^"]*"|'[^']*')|(\bPIC(?:TURE)?\s+(?:IS\s+)?[A-Za-z0-9()V.,+\-$*\/]+)|(\b[A-Za-z][A-Za-z0-9-]*\b)|(\b\d+(?:\.\d+)?\b)/gi;
+      let last = 0, m;
+      while ((m = re.exec(line))) {
+        span(f, "", line.slice(last, m.index));
+        if (m[1]) span(f, "cmt", m[1]); else if (m[2]) span(f, "str", m[2]); else if (m[3]) span(f, "pic", m[3]);
+        else if (m[4]) span(f, COBOL_KW.has(m[4].toUpperCase()) ? "kw" : "", m[4]);
+        else if (m[5]) span(f, /^\s*$/.test(line.slice(0, m.index)) && line[m.index + m[5].length] === " " ? "lv" : "num", m[5]);
+        last = m.index + m[0].length;
+      }
+      span(f, "", line.slice(last));
+    }
+    function highlightCobol(text) {
+      const f = document.createDocumentFragment();
+      text.split("\n").forEach((ln, i, a) => { cobolLine(ln, f); if (i < a.length - 1) f.appendChild(document.createTextNode("\n")); });
+      return f;
+    }
+    const JAVA_KW = new Set("abstract assert boolean break byte case catch char class const continue default do double else enum extends final finally float for if implements import instanceof int interface long new package private protected public return short static super switch this throw throws try var void while true false null".split(" "));
+    function highlightJava(text) {
+      const f = document.createDocumentFragment();
+      const re = /(\/\/.*$|\/\*[\s\S]*?\*\/)|("(?:[^"\\\n]|\\.)*")|(\b\d+(?:\.\d+)?[LlFfDd]?\b)|(\b[A-Za-z_][A-Za-z0-9_]*\b)/gm;
+      let last = 0, m;
+      while ((m = re.exec(text))) {
+        span(f, "", text.slice(last, m.index));
+        if (m[1]) span(f, "cmt", m[1]); else if (m[2]) span(f, "str", m[2]); else if (m[3]) span(f, "num", m[3]);
+        else span(f, JAVA_KW.has(m[4]) ? "kw" : /^[A-Z]/.test(m[4]) ? "ty" : "", m[4]);
+        last = m.index + m[0].length;
+      }
+      span(f, "", text.slice(last));
+      return f;
+    }
+
+    /* ================= documents (tabs) ================= */
+    const docs = [{ id: "welcome", name: "Welcome", kind: "welcome" }];
+    let active = 0, untitled = 0;
+    const isDirty = (d) => d.kind === "cobol" && d.cobol !== d.saved;
+    const uid = () => "d" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const doc = () => docs[active];
+    const ta = $("cobol"), hl = $("hl"), gut = $("gutter"), cur = $("curline");
+    let gutN = 0;
+    function lineInfo() {
+      const v = ta.value, p = ta.selectionStart, before = v.slice(0, p);
+      const line = before.split("\n").length, col = p - before.lastIndexOf("\n");
+      return { line, col };
+    }
+    function buildGutter() {
+      const n = Math.max(ta.value.split("\n").length, 30);
+      if (n !== gutN) { gutN = n; const f = document.createDocumentFragment(); for (let i = 1; i <= n; i++) f.appendChild(el("div", "", String(i))); gut.replaceChildren(f); }
+    }
+    function caretUI() {
+      if (doc().kind !== "cobol") return;
+      const { line, col } = lineInfo();
+      $("sbPos").textContent = "Ln " + line + ", Col " + col;
+      cur.style.top = (12 + (line - 1) * 22 - ta.scrollTop) + "px";
+      [...gut.children].forEach((d, i) => d.classList.toggle("on", i === line - 1));
+    }
+    function scrollSync() { hl.scrollTop = ta.scrollTop; hl.scrollLeft = ta.scrollLeft; gut.scrollTop = ta.scrollTop; caretUI(); }
+    function syncEditor() {
+      const text = ta.value.length > 40000 ? ta.value.slice(0, 40000) : ta.value;
+      hl.replaceChildren(highlightCobol(text + "\n"));
+      buildGutter(); scrollSync();
+    }
+    ta.addEventListener("input", () => { doc().cobol = ta.value; syncEditor(); refreshDirty(); persist(); if (doc().folder) scheduleTree(); });
+    ta.addEventListener("scroll", scrollSync);
+    ["keyup", "click", "focus", "select"].forEach((ev) => ta.addEventListener(ev, caretUI));
+    document.addEventListener("selectionchange", () => { if (document.activeElement === ta) caretUI(); });
+
+    function renderTabs() {
+      const box = $("tabs"); box.replaceChildren();
+      let selEl = null;
+      docs.forEach((d, i) => {
+        if (d.open === false) return;
+        const t = el("div", "tab" + (isDirty(d) ? " dirty" : "")); t.setAttribute("role", "tab"); t.setAttribute("aria-selected", String(i === active)); t.tabIndex = 0;
+        t.append(d.kind === "welcome" ? el("span", "fi", "i") : el("span", "fi", "CBL"));
+        t.append(document.createTextNode(d.name));
+        const x = el("button", "x"); x.append(el("span", "dot", "●"), el("span", "cx", "×")); x.type = "button"; x.setAttribute("aria-label", "Close " + d.name);
+        x.onclick = (e) => { e.stopPropagation(); closeDoc(i); };
+        t.append(x);
+        t.onclick = () => activate(i);
+        t.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(i); } };
+        t.dataset.i = String(i); if (i === active) selEl = t;
+        box.append(t);
+      });
+      if (selEl && selEl.scrollIntoView) selEl.scrollIntoView({ block: "nearest", inline: "nearest" });
+      renderFiles();
+    }
+    function renderFiles() {
+      const box = $("fileList"); box.replaceChildren();
+      const nb = el("button", "file", "+ New COBOL file"); nb.type = "button"; nb.style.color = "var(--link)"; nb.onclick = () => newFile(); box.append(nb);
+      const fb = el("button", "file", "+ Open folder\u2026"); fb.type = "button"; fb.style.color = "var(--link)"; fb.onclick = () => openFolder(); box.append(fb);
+      docs.forEach((d, i) => {
+        if (d.kind !== "cobol" || d.folder) return;
+        const b = el("button", "file"); b.type = "button"; b.setAttribute("aria-current", String(i === active));
+        b.append(el("span", "fi", "CBL"), document.createTextNode(d.name + (isDirty(d) ? "  ●" : ""))); b.onclick = () => activate(i); b.ondblclick = () => renameDoc(i); box.append(b);
+      });
+      renderFolder();
+    }
+    function activate(i, skipSave) {
+      if (i < 0 || i >= docs.length) return;
+      if (!skipSave && doc() && doc().kind === "cobol") doc().cobol = ta.value;
+      active = i; docs[i].open = true;
+      const d = doc(), isW = d.kind === "welcome";
+      $("welcome").hidden = !isW; $("codeWrap").hidden = isW;
+      setTitle();
+      $("cPaste").disabled = $("cCopy").disabled = isW;
+      $("crumb").replaceChildren(el("span", "", "Parity"), el("span", "", "›"), el("b", "", d.path || d.name));
+      if (!isW) { ta.value = d.cobol; gutN = 0; syncEditor(); ta.scrollTop = 0; ta.scrollLeft = 0; scrollSync(); }
+      else $("sbPos").textContent = "";
+      renderTabs(); renderInputs(); persist();
+      if (!d.res) d.res = newRes();
+      S = d.res; paint();
+    }
+    function setTitle() { const d = doc(); $("titleC").textContent = d.name + (isDirty(d) ? " ●" : "") + " — Parity"; }
+    function refreshDirty() {
+      const d = doc(), t = $("tabs").querySelector('[data-i="' + active + '"]');
+      if (t) t.classList.toggle("dirty", isDirty(d));
+      setTitle();
+    }
+    let saveT = null;
+    function persist() {
+      clearTimeout(saveT);
+      saveT = setTimeout(() => {
+        try {
+          if (doc().kind === "cobol") doc().cobol = ta.value;
+          localStorage.setItem("parity.docs", JSON.stringify({
+            untitled, active: doc().id,
+            docs: docs.filter((d) => d.kind === "cobol" && !d.folder).map((d) => ({ id: d.id, name: d.name, cobol: d.cobol, inputs: d.inputs, isel: d.isel, saved: d.saved }))
+          }));
+        } catch (e) { }
+      }, 300);
+    }
+    function restore() {
+      try {
+        const s = JSON.parse(localStorage.getItem("parity.docs") || "null");
+        if (!s || !Array.isArray(s.docs) || !s.docs.length) return false;
+        untitled = +s.untitled || 0;
+        s.docs.forEach((d) => docs.push({
+          id: String(d.id || uid()), name: String(d.name || "untitled.cob"), kind: "cobol", cobol: String(d.cobol || ""),
+          inputs: Array.isArray(d.inputs) && d.inputs.length ? d.inputs.map(String) : [""], isel: 0, saved: typeof d.saved === "string" ? d.saved : String(d.cobol || ""), handle: null
+        }));
+        const i = docs.findIndex((d) => d.id === s.active);
+        activate(i >= 0 ? i : docs.length - 1, true);
+        return true;
+      } catch (e) { return false; }
+    }
+    function renameDoc(i) {
+      const d = docs[i]; if (!d || d.kind !== "cobol") return;
+      const n = (prompt("Rename file", d.name) || "").trim();
+      if (!n || n === d.name) return;
+      d.name = n; d.handle = null; renderTabs(); setTitle(); persist();
+    }
+    function closeDoc(i) {
+      if (doc().kind === "cobol") doc().cobol = ta.value;
+      const d0 = docs[i], cur = doc();
+      if (isDirty(d0) && !confirm(d0.name + " has unsaved changes. Close it without saving?")) return;
+      const wasActive = d0 === cur;
+      let next = null;   // the open tab that takes over: the one before, else the one after
+      if (wasActive) {
+        for (let k = i - 1; k >= 0 && !next; k--) if (docs[k].open !== false) next = docs[k];
+        for (let k = i + 1; k < docs.length && !next; k++) if (docs[k].open !== false) next = docs[k];
+      }
+      if (d0.folder) d0.open = false; else docs.splice(i, 1);   // folder files stay in the Explorer
+      if (!docs.some((d) => d.open !== false)) docs.push({ id: "welcome", name: "Welcome", kind: "welcome" });
+      const target = wasActive ? (next || docs.find((d) => d.open !== false)) : cur;
+      activate(docs.indexOf(target), true);
+    }
+    const TEMPLATE = [
+      "IDENTIFICATION DIVISION.",
+      "PROGRAM-ID. MY-PROGRAM.",
+      "DATA DIVISION.",
+      "WORKING-STORAGE SECTION.",
+      "01 WS-MESSAGE PIC X(16) VALUE \"HELLO FROM COBOL\".",
+      "PROCEDURE DIVISION.",
+      "MAIN-PARA.",
+      "    DISPLAY WS-MESSAGE",
+      "    STOP RUN.",
+      ""].join("\n");
+    function newFile(quiet) {
+      untitled++;
+      docs.push({ id: uid(), name: "untitled-" + untitled + ".cob", kind: "cobol", cobol: TEMPLATE, inputs: [""], isel: 0, saved: TEMPLATE, handle: null });
+      activate(docs.length - 1); if (quiet !== true) ta.focus();
+    }
+    function addDoc(name, text, handle) {
+      docs.push({ id: uid(), name, kind: "cobol", cobol: text, inputs: [""], isel: 0, saved: text, handle: handle || null });
+      activate(docs.length - 1); ta.focus();
+    }
+    $("wNew").onclick = () => newFile();
+    $("wOpen").onclick = () => openFiles();
+    $("wFolder").onclick = () => openFolder();
+    $("wChat").onclick = () => toggleChat(true);
+
+    /* ---- files: open / save (real files via the File System Access API where the browser has it) ---- */
+    const FTYPES = [{ description: "COBOL source", accept: { "text/plain": [".cob", ".cbl", ".cobol", ".cpy", ".txt"] } }];
+    function downloadText(name, text) {
+      const a = document.createElement("a"), u = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+      a.href = u; a.download = name; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 2000);
+    }
+    async function readIntoDoc(file, handle) {
+      if (file.size > 400000) { toast("no", "File too large", file.name + " is over 400 KB."); return; }
+      addDoc(file.name, (await file.text()).replace(/\r\n/g, "\n"), handle);
+    }
+    async function openFiles() {
+      try {
+        if (window.showOpenFilePicker) {
+          const hs = await window.showOpenFilePicker({ multiple: true, types: FTYPES });
+          for (const h of hs) await readIntoDoc(await h.getFile(), h);
+        } else $("fileIn").click();
+      } catch (e) { if (!e || e.name !== "AbortError") toast("no", "Could not open the file", (e && e.message) || String(e)); }
+    }
+    $("fileIn").addEventListener("change", async (e) => { for (const f of e.target.files) await readIntoDoc(f, null); e.target.value = ""; });
+    async function saveDoc(d, as) {
+      if (!d || d.kind !== "cobol") { toast("no", "Nothing to save", "Open a COBOL file first."); return false; }
+      if (d === doc()) d.cobol = ta.value;
+      try {
+        if (window.showSaveFilePicker) {
+          if (as || !d.handle) { d.handle = await window.showSaveFilePicker({ suggestedName: d.name, types: FTYPES }); d.name = d.handle.name; }
+          const w = await d.handle.createWritable(); await w.write(d.cobol); await w.close();
+        } else {
+          if (as) { const n = (prompt("Save as", d.name) || "").trim(); if (!n) return false; d.name = n; }
+          downloadText(d.name, d.cobol);
+        }
+        d.saved = d.cobol; renderTabs(); setTitle(); persist();
+        toast("ok", "Saved", d.name); return true;
+      } catch (e) { if (e && e.name === "AbortError") return false; toast("no", "Could not save", (e && e.message) || String(e)); return false; }
+    }
+    document.addEventListener("dragover", (e) => { if (e.dataTransfer && [...e.dataTransfer.types].includes("Files")) e.preventDefault(); });
+    document.addEventListener("drop", async (e) => {
+      if (!e.dataTransfer || !e.dataTransfer.files.length) return;
+      e.preventDefault(); for (const f of e.dataTransfer.files) await readIntoDoc(f, null);
+    });
+
+    /* ---- editing helpers (execCommand keeps the browser's own undo stack) ---- */
+    function insertText(t) {
+      ta.focus();
+      if (!document.execCommand("insertText", false, t)) { ta.setRangeText(t, ta.selectionStart, ta.selectionEnd, "end"); ta.dispatchEvent(new Event("input")); }
+    }
+    function blockRange(extra) {
+      const v = ta.value, s = ta.selectionStart, e = ta.selectionEnd;
+      const ls = v.lastIndexOf("\n", s - 1) + 1; let end = e; if (e > s && v[e - 1] === "\n") end = e - 1;
+      let le = v.indexOf("\n", end); if (le < 0) le = v.length; return [ls, le];
+    }
+    function rewriteBlock(fn) {
+      const [ls, le] = blockRange(), s = ta.selectionStart, e = ta.selectionEnd, old = ta.value.slice(ls, le), nw = fn(old);
+      ta.setSelectionRange(ls, le); insertText(nw);
+      if (s === e) { const c = Math.max(ls, Math.min(ls + nw.length, s + (nw.length - old.length))); ta.setSelectionRange(c, c); } else ta.setSelectionRange(ls, ls + nw.length);
+    }
+    function indentSel(out) {
+      if (ta.selectionStart === ta.selectionEnd && !out) return insertText("    ");
+      rewriteBlock((b) => b.split("\n").map((l) => (out ? l.replace(/^( {1,4}|\t)/, "") : "    " + l)).join("\n"));
+    }
+    function toggleComment() {
+      rewriteBlock((b) => {
+        const ls = b.split("\n"), all = ls.every((l) => !l.trim() || /^\s*\*>/.test(l));
+        return ls.map((l) => (!l.trim() ? l : all ? l.replace(/^(\s*)\*> ?/, "$1") : l.replace(/^(\s*)/, "$1*> "))).join("\n");
+      });
+    }
+    ta.addEventListener("keydown", (e) => {
+      const mod = e.ctrlKey || e.metaKey;
+      if (e.key === "Tab" && !mod && !e.altKey) { e.preventDefault(); indentSel(e.shiftKey); }
+      else if (e.key === "Enter" && !mod && !e.shiftKey && !e.altKey) {
+        const v = ta.value, ls = v.lastIndexOf("\n", ta.selectionStart - 1) + 1, ind = /^[ \t]*/.exec(v.slice(ls, ta.selectionStart))[0];
+        if (ind) { e.preventDefault(); insertText("\n" + ind); }
+      } else if (mod && e.key === "/") { e.preventDefault(); toggleComment(); }
+    });
+    async function copyText(text, btn) {
+      let ok = false;
+      try { await navigator.clipboard.writeText(text); ok = true; } catch (e) {
+        const t = document.createElement("textarea"); t.value = text; t.style.cssText = "position:fixed;opacity:0"; document.body.append(t); t.select();
+        try { ok = document.execCommand("copy"); } catch (e2) { } t.remove();
+      }
+      if (btn) { const o = btn.textContent; btn.textContent = ok ? "Copied" : "Copy failed"; setTimeout(() => { btn.textContent = o; }, 1300); }
+      return ok;
+    }
+    async function pasteClip() {
+      if (doc().kind !== "cobol") return;
+      try { insertText(await navigator.clipboard.readText()); } catch (e) { ta.focus(); toast("no", "Paste was blocked by the browser", "Click in the editor and press Ctrl+V."); }
+    }
+    $("cCopy").onclick = () => copyText(ta.value.slice(ta.selectionStart, ta.selectionEnd) || ta.value, $("cCopy"));
+    $("cPaste").onclick = pasteClip;
+
+    /* ---- menu bar ---- */
+    let menuOpen = false;
+    const editCmd = (c) => { if (doc().kind !== "cobol") return; ta.focus(); document.execCommand(c); };
+    const toggleSide = () => { const h = $("ide").classList.toggle("nosb"); $("abExp").setAttribute("aria-pressed", String(!h)); };
+    const MENUS = [
+      ["File", [["New File", "Ctrl+Alt+N", () => newFile()], ["Open File…", "Ctrl+O", () => openFiles()], ["Open Folder…", "", () => openFolder()], ["-"], ["Save", "Ctrl+S", () => saveDoc(doc())], ["Save As…", "Ctrl+Shift+S", () => saveDoc(doc(), true)], ["Rename…", "Double-click in Explorer", () => renameDoc(active)], ["-"], ["Download Java", "", () => downloadJava()], ["-"], ["Close Editor", "Ctrl+Alt+W", () => closeDoc(active)]]],
+      ["Edit", [["Undo", "Ctrl+Z", () => editCmd("undo")], ["Redo", "Ctrl+Y", () => editCmd("redo")], ["-"], ["Cut", "Ctrl+X", () => editCmd("cut")], ["Copy", "Ctrl+C", () => editCmd("copy")], ["Paste", "Ctrl+V", () => pasteClip()], ["-"], ["Select All", "Ctrl+A", () => { if (doc().kind === "cobol") { ta.focus(); ta.select(); } }], ["Toggle Line Comment", "Ctrl+/", () => { if (doc().kind === "cobol") { ta.focus(); toggleComment(); } }]]],
+      ["View", [["Explorer", "Ctrl+B", toggleSide], ["Color Theme…", "Ctrl+K Ctrl+T", () => qpOpen()], ["AI Assistant", "Ctrl+Alt+A", () => toggleChat()], ["Command Palette…", "Ctrl+Shift+P", () => qpOpen()]]],
+      ["Run", [["Verify Translation", "Ctrl+Enter", () => go()], ["Convert All in Folder", "", () => convertAll()]]],
+    ];
+    function closeMenus() { document.querySelectorAll("#menubar .dd").forEach((d) => { d.hidden = true; }); document.querySelectorAll("#menubar .mb").forEach((b) => b.classList.remove("on")); menuOpen = false; }
+    function openMenu(b, dd) { closeMenus(); dd.hidden = false; b.classList.add("on"); menuOpen = true; }
+    MENUS.forEach(([label, items]) => {
+      const w = el("div", "mw"), b = el("button", "mb", label), dd = el("div", "dd"); b.type = "button"; dd.hidden = true;
+      dd.onmousedown = (e) => e.preventDefault();
+      items.forEach((it) => {
+        if (it[0] === "-") return dd.append(el("div", "msep"));
+        const r = el("button", "mi"); r.type = "button"; r.append(el("span", "", it[0]), el("kbd", "", it[1] || "")); r.onclick = (e) => { e.stopPropagation(); closeMenus(); it[2](); }; dd.append(r);
+      });
+      b.onclick = (e) => { e.stopPropagation(); dd.hidden ? openMenu(b, dd) : closeMenus(); };
+      b.onmouseenter = () => { if (menuOpen && dd.hidden) openMenu(b, dd); };
+      w.append(b, dd); $("menubar").append(w);
+    });
+    document.addEventListener("click", closeMenus);
+    $("wRun").onclick = () => go();
+
+    /* ================= samples ================= */
+    fetch("/api/config").then((r) => r.json()).then((c) => {
+      const short = (m) => (m || "").split("/").pop();
+      const a = el("div"); a.append(document.createTextNode("Model: "), el("b", "", short(c.models.ultra)));
+      $("models").append(a);
+    }).catch(() => { });
+    document.querySelectorAll(".sx").forEach((b) => b.onclick = () => $(b.dataset.sect).classList.toggle("closed"));
+    $("abExp").onclick = () => toggleSide();
+    $("abRun").onclick = () => go();
+
+    /* ================= test inputs ================= */
+    function renderInputs() {
+      const d = doc(), list = $("ilist"); list.replaceChildren();
+      $("cntIn").textContent = d.kind === "cobol" ? d.inputs.length : 1;
+      if (d.kind !== "cobol") { list.append(el("div", "empty", "Open a COBOL file to add inputs.")); $("inTa").value = ""; $("inTa").disabled = true; return; }
+      $("inTa").disabled = false;
+      d.inputs.forEach((v, i) => {
+        const b = el("button", "it", "Input " + (i + 1) + (v.trim() ? "" : " (empty)")); b.type = "button"; b.setAttribute("aria-selected", String(i === d.isel));
+        b.onclick = () => { d.isel = i; renderInputs(); }; list.append(b);
+      });
+      if (d.inputs.length < 5) { const a = el("button", "add", "+ Add input"); a.type = "button"; a.onclick = () => { d.inputs.push(""); d.isel = d.inputs.length - 1; renderInputs(); $("inTa").focus(); }; list.append(a); }
+      if (d.inputs.length > 1) { const r = el("button", "rm", "Remove this input"); r.type = "button"; r.onclick = () => { d.inputs.splice(d.isel, 1); d.isel = Math.max(0, d.isel - 1); renderInputs(); }; list.append(r); }
+      $("inTa").value = d.inputs[d.isel] || "";
+    }
+    $("inTa").addEventListener("input", (e) => {
+      const d = doc(); if (d.kind !== "cobol") return;
+      d.inputs[d.isel] = e.target.value;
+      const items = document.querySelectorAll(".ilist .it"); if (items[d.isel]) items[d.isel].textContent = "Input " + (d.isel + 1) + (e.target.value.trim() ? "" : " (empty)");
+    });
+
+    /* ================= panel tabs + resize ================= */
+    function showPanel(p) {
+      ["ver", "in", "log"].forEach((k) => { $("pt-" + k).setAttribute("aria-selected", String(k === p)); $("p-" + k).hidden = k !== p; });
+      const pb = $("pbody"); pb.scrollTop = p === "log" ? pb.scrollHeight : 0;
+    }
+    document.querySelectorAll(".pt").forEach((b) => b.onclick = () => showPanel(b.dataset.p));
+    (function () {
+      const h = $("vsplit"); let drag = false;
+      h.addEventListener("pointerdown", (e) => { drag = true; h.classList.add("drag"); h.setPointerCapture(e.pointerId); });
+      h.addEventListener("pointermove", (e) => {
+        if (!drag) return;
+        const r = $("ide").getBoundingClientRect();
+        const px = Math.min(Math.max(r.bottom - 24 - e.clientY, 110), r.height - 260);
+        document.documentElement.style.setProperty("--panel-h", px + "px");
+      });
+      const end = () => { drag = false; h.classList.remove("drag"); };
+      h.addEventListener("pointerup", end); h.addEventListener("pointercancel", end);
+    })();
+
+    /* ================= toasts ================= */
+    function toast(kind, head, body) {
+      const t = el("div", "toast " + kind);
+      const tx = el("div", "tx"); tx.append(el("b", "", head), el("span", "", body)); t.append(tx);
+      const c = el("button", "cl", "×"); c.type = "button"; c.setAttribute("aria-label", "Dismiss"); c.onclick = () => t.remove(); t.append(c);
+      $("toasts").append(t); setTimeout(() => t.remove(), 9000);
+    }
+
+    /* ================= run state: one results object per file ================= */
+    const DEFAULT_TEXT = "COBOL runs first. The Java's output is then checked against it line by line.";
+    const newRes = () => ({
+      tests: [], sel: 0, pending: false, java: "", att: [], nIn: 0, ph: -1, verdict: null, trSub: "", cmpSub: "", tok: 0, live: 0, t0: 0,
+      text: DEFAULT_TEXT, log: [], busyLog: false, liveTxt: "", badge: ["generated", ""], status: ["Ready", ""], nAtt: 0, time: "0.0s", cnt: null, name: ""
+    });
+    let S = newRes();   // results of the file on screen
+    let R = null;       // results of the run in progress (may belong to another file)
+    let timer = null, javaShown = null;
+    const tierName = (t) => (t === "nano" ? "Small" : t === "super" ? "Medium" : "Ultra");
+
+    /* run log + status writers: they only change data; paint() puts it on screen */
+    function rlog(kind, text) { R.log.push({ t: new Date().toLocaleTimeString("en-GB"), k: kind, x: text }); R.busyLog = false; }
+    function rbusy() { R.busyLog = true; R.liveTxt = ""; }
+    function rstat(txt, led) { R.status = [txt, led || ""]; }
+    function rbadge(txt, cls) { R.badge = [txt, cls || ""]; }
+
+    function paintLog() {
+      const t = $("term"); t.replaceChildren();
+      S.log.forEach((l) => { const d = el("div", "ln"); d.append(el("span", "tm", l.t), el("span", l.k, l.x)); t.append(d); });
+      if (S.busyLog) { const d = el("div", "ln"); d.append(el("span", "tm", " "), el("span", "caret"), el("span", "live", S.liveTxt)); t.append(d); }
+      if (!$("p-log").hidden) { const pb = $("pbody"); pb.scrollTop = pb.scrollHeight; }
+    }
+    function paint() {
+      renderVerify(); paintLog();
+      $("sbState").textContent = S.status[0]; $("led").className = "led " + (S.status[1] || "");
+      $("sbAtt").textContent = S.nAtt; $("sbTok").textContent = nf.format(S.tok + S.live); $("sbTime").textContent = S.time;
+      setBadge(S.badge[0], S.badge[1]);
+      if (javaShown !== S.java) showJava(S.java);
+      const cv = $("cntVer"); if (S.cnt) { cv.hidden = false; cv.textContent = S.cnt.t; cv.className = "cnt " + S.cnt.c; } else cv.hidden = true;
+    }
+
+    /* ---- verification panel ---- */
+    const STEPS = ["Run COBOL", "Translate", "Compile and run", "Compare", "Verdict"];
+    function renderVerify() {
+      const box = $("p-ver"); box.replaceChildren();
+      if (S.ph < 0 && !S.verdict && !S.tests.length) {
+        const e = el("div", "empty", "Run a program to see the pipeline, each attempt, and the line-by-line comparison here.");
+        box.append(e); return;
+      }
+      const vd = el("div", "vd" + (S.verdict ? " " + S.verdict : ""));
+      vd.append(el("b", "", S.verdict === "ok" ? "✓ Outputs match" : S.verdict === "no" ? "× Outputs do not match" : "Verifying"), el("small", "", S.text));
+      box.append(vd);
+      const pipe = el("div", "pipe");
+      STEPS.forEach((n, k) => {
+        let cls = "", mark = "";
+        if (S.verdict) { if (k < 4) { cls = "done"; mark = "✓"; } else { cls = S.verdict; mark = S.verdict === "ok" ? "✓" : "×"; } }
+        else if (S.ph > k) { cls = "done"; mark = "✓"; } else if (S.ph === k) cls = "now";
+        const s = el("div", "st " + cls); s.append(el("span", "d", mark), el("span", "n", n));
+        let sub = "";
+        if (k === 0 && S.nIn) sub = S.nIn + (S.nIn > 1 ? " inputs" : " input");
+        if (k === 1) sub = S.trSub; if (k === 3) sub = S.cmpSub;
+        if (sub) s.append(el("small", "", sub));
+        pipe.append(s); if (k < STEPS.length - 1) pipe.append(el("span", "arrow", "›"));
+      });
+      box.append(pipe);
+      if (S.att.length) {
+        const at = el("div", "atts");
+        S.att.forEach((a) => { const c = el("div", "att " + a.st); c.append(el("span", "g", a.st === "ok" ? "✓" : a.st === "no" ? "×" : a.st === "cap" ? "!" : "…"), el("span", "", tierName(a.tier) + " #" + a.round), el("i", "", a.note || "working")); at.append(c); });
+        box.append(at);
+      }
+      if (!S.tests.length) return;
+      if (S.tests.length > 1) {
+        const it = el("div", "itabs"); it.setAttribute("role", "tablist");
+        S.tests.forEach((x, i) => { const b = el("button", "pill", "Input " + (i + 1)); b.type = "button"; b.setAttribute("role", "tab"); b.setAttribute("aria-selected", String(i === S.sel)); if (!S.pending) b.append(el("span", "g " + (x.ok ? "ok" : "no"), x.ok ? "✓" : "×")); b.onclick = () => { S.sel = i; renderVerify(); }; it.append(b); });
+        box.append(it);
+      }
+      const t = S.tests[Math.min(S.sel, S.tests.length - 1)];
+      if (t.compileError) { box.append(el("pre", "cerr", t.compileError)); return; }
+      const a = t.expected.split("\n"), b = S.pending ? [] : t.actual.split("\n");
+      const n = S.pending ? a.length : Math.max(a.length, b.length);
+      let same = 0;
+      const diff = el("div", "diff");
+      const dh = el("div", "dh"); dh.append(el("span", "", "COBOL output"), el("span", "", "Java output")); diff.append(dh);
+      for (let i = 0; i < n; i++) {
+        const bad = !S.pending && a[i] !== b[i]; if (!S.pending && !bad) same++;
+        const row = el("div", "dr" + (bad ? " bad" : ""));
+        const c1 = el("div", "dc"), c2 = el("div", "dc");
+        c1.append(el("div", "dn", a[i] === undefined ? "" : String(i + 1)), dcell(a[i], b[i], bad));
+        c2.append(el("div", "dn", b[i] === undefined ? "" : String(i + 1)));
+        if (S.pending) { const w = el("div", "dt"); if (i === 0) w.append(el("span", "dwait", "Waiting for the Java")); c2.append(w); } else c2.append(dcell(b[i], a[i], bad));
+        row.append(c1, c2); diff.append(row);
+      }
+      if (!S.pending) box.append(el("p", "sumline", same + " of " + n + " output lines match" + (S.tests.length > 1 ? " on input " + (S.sel + 1) : "")));
+      box.append(diff);
+      if (!S.pending && t.error) box.append(el("pre", "cerr", t.error));
+      if (t.stdin && t.stdin.trim()) box.append(el("p", "cin", "stdin: " + t.stdin.replace(/\n/g, " ↵ ").trim()));
+    }
+    function dcell(text, other, bad) {
+      const c = el("div", "dt");
+      if (text === undefined) return c;
+      if (bad && other !== undefined) {
+        let i = 0; while (i < text.length && i < other.length && text[i] === other[i]) i++;
+        c.append(document.createTextNode(text.slice(0, i)), el("span", "ch", text.slice(i) || "⏎"));
+      } else c.textContent = text;
+      return c;
+    }
+    function showJava(code) {
+      javaShown = code;
+      $("jempty").hidden = !!code; $("jwrap").hidden = !code; $("copy").disabled = $("dl").disabled = !code;
+      if (code) {
+        $("jv").replaceChildren(highlightJava(code));
+        const n = code.split("\n").length; const f = document.createDocumentFragment(); for (let i = 1; i <= n; i++) f.appendChild(el("div", "", String(i))); $("jgut").replaceChildren(f);
+      }
+    }
+    function downloadJava() { if (!S.java) { toast("no", "No Java yet", "Verify a program first."); return; } downloadText("Main.java", S.java); }
+    $("copy").onclick = () => {
+      const sel = window.getSelection(), inJ = sel && sel.rangeCount && !sel.isCollapsed && $("jv").contains(sel.anchorNode);
+      copyText(inJ ? sel.toString() : S.java, $("copy"));
+    };
+    $("dl").onclick = downloadJava;
+    $("jwrap").addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") { e.preventDefault(); const r = document.createRange(); r.selectNodeContents($("jv")); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); }
+    });
+
+    /* ---- draggable divider between the COBOL and Java editors ---- */
+    (function () {
+      const h = $("hsplit"), ed = document.querySelector(".editors"); let drag = false;
+      const set = (px) => { const w = ed.getBoundingClientRect().width; ed.style.setProperty("--cw", Math.min(Math.max(px, 220), w - 220) + "px"); };
+      h.addEventListener("pointerdown", (e) => { drag = true; h.classList.add("drag"); h.setPointerCapture(e.pointerId); e.preventDefault(); });
+      h.addEventListener("pointermove", (e) => { if (drag) set(e.clientX - ed.getBoundingClientRect().left); });
+      const end = () => { drag = false; h.classList.remove("drag"); };
+      h.addEventListener("pointerup", end); h.addEventListener("pointercancel", end);
+      h.addEventListener("dblclick", () => ed.style.removeProperty("--cw"));
+      h.addEventListener("keydown", (e) => {
+        if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return; e.preventDefault();
+        const cur = ed.children[0].getBoundingClientRect().width; set(cur + (e.key === "ArrowLeft" ? -40 : 40));
+      });
+    })();
+    function setBadge(txt, cls) { const b = $("jbadge"); b.textContent = txt; b.className = "badge" + (cls ? " " + cls : ""); }
+    const tickClock = () => { if (!R) return; R.time = ((Date.now() - R.t0) / 1000).toFixed(1) + "s"; if (S === R) $("sbTime").textContent = R.time; };
+
+    /* ---- events: change the running file's results, repaint only if that file is on screen ---- */
+    function apply(ev) {
+      switch (ev.type) {
+        case "stage": R.ph = 0; rlog("dim", "Running the COBOL program with GnuCOBOL"); rbusy(); rstat("Running the COBOL program", "busy"); break;
+        case "oracle":
+          R.nIn = ev.outputs.length; R.pending = true; R.sel = 0; R.ph = 1;
+          R.tests = ev.outputs.map((o, i) => ({ i: i + 1, expected: o, actual: "", ok: false, stdin: ev.stdins[i] }));
+          rlog("ok", "COBOL ran on " + ev.outputs.length + " input" + (ev.outputs.length > 1 ? "s" : "") + " (" + ev.format + ")"); break;
+        case "tier_start": rlog("prompt", tierName(ev.tier) + " model: " + (ev.model || "").split("/").pop()); break;
+        case "model_call":
+          R.ph = 1; R.trSub = tierName(ev.tier) + ", attempt " + ev.round; R.att.push({ tier: ev.tier, round: ev.round, st: "wrk", note: "writing Java" });
+          rlog("dim", "Asking the " + tierName(ev.tier).toLowerCase() + " model, attempt " + ev.round); rbusy();
+          rstat("Asking the " + tierName(ev.tier).toLowerCase() + " model, attempt " + ev.round, "busy"); R.nAtt = R.att.length; rbadge("writing", ""); break;
+        case "model_reply": {
+          const a = R.att[R.att.length - 1]; R.tok += ev.tout; R.live = 0;
+          const cap = ev.finish === "length" || ev.finish === "timeout"; if (a) { a.st = cap ? "cap" : "wrk"; a.note = cap ? (ev.finish === "timeout" ? "time limit" : "token cap") : nf.format(ev.tout) + " tokens"; }
+          rlog(cap ? "warn" : "dim", cap ? "Hit the " + (ev.finish === "timeout" ? "time limit" : "token cap") + " after " + nf.format(ev.tout) + " tokens" : "Reply: " + nf.format(ev.tout) + " tokens in " + ev.secs + "s"); break;
+        }
+        case "progress": {
+          const a = R.att[R.att.length - 1], txt = nf.format(ev.tokens) + " tokens so far, " + ev.secs + "s";
+          if (a && a.st === "wrk") a.note = txt;
+          R.live = ev.tokens; R.liveTxt = txt;
+          rstat("Asking the " + tierName(ev.tier).toLowerCase() + " model, attempt " + ev.round + " · " + txt, "busy"); break;
+        }
+        case "note": rlog("warn", ev.text); break;
+        case "java": R.ph = 2; R.java = ev.code; rbadge("testing", ""); rlog("dim", "Compiling and running the Java"); rbusy(); rstat("Compiling and running the Java", "busy"); break;
+        case "tests": {
+          const pass = ev.tests.filter((x) => x.ok).length, a = R.att[R.att.length - 1];
+          R.cmpSub = ev.compile_error ? "does not compile" : pass + " of " + ev.tests.length + " match";
+          if (a) { a.st = ev.ok ? "ok" : "no"; a.note = R.cmpSub; }
+          rlog(ev.ok ? "ok" : "err", "Compare outputs: " + R.cmpSub);
+          if (ev.compile_error) { rlog("err", ev.compile_error.split("\n")[0].slice(0, 160)); R.tests = R.tests.map((x) => Object.assign({}, x, { actual: "", ok: false, compileError: ev.compile_error })); R.pending = false; }
+          else { R.tests = ev.tests; R.pending = false; const bad = ev.tests.findIndex((x) => !x.ok); R.sel = bad >= 0 ? bad : 0; }
+          R.ph = ev.ok ? 3 : 1; if (!ev.ok) R.trSub = "revising"; rbadge(ev.ok ? "matches" : "differs", ev.ok ? "ok" : "no"); break;
+        }
+        case "error": rlog("err", ev.text); R.verdict = "no"; R.ph = -1; R.text = ev.text; rstat("Stopped", "no"); if (!R.quiet) toast("no", "Could not finish" + (S !== R ? " · " + R.name : ""), ev.text); break;
+        case "done": {
+          R.verdict = ev.solved ? "ok" : "no"; R.trSub = R.att.length + (R.att.length === 1 ? " attempt" : " attempts");
+          R.text = ev.solved ? "Matched on " + ev.n_tests + " input" + (ev.n_tests > 1 ? "s" : "") + ", solved by the " + tierName(ev.solved_by).toLowerCase() + " model. Differential test, not a proof." : ev.stopped === "time" ? "Stopped at the " + Math.round((ev.budget || 0) / 60) + " minute time limit before the outputs matched. The last attempt is shown." : "No attempt produced matching output. The last attempt is shown.";
+          if (ev.java) R.java = ev.java;
+          R.tok = ev.totals.tout; R.live = 0; R.time = ev.secs + "s";
+          rlog(ev.solved ? "ok" : "err", ev.solved ? "Verified: outputs match" : "Not matched");
+          rlog("dim", "Time " + ev.secs + "s, tokens out " + nf.format(R.tok));
+          rstat(ev.solved ? "Verified on " + ev.n_tests + " input" + (ev.n_tests > 1 ? "s" : "") : "Not matched", ev.solved ? "ok" : "no");
+          rbadge(ev.solved ? "matches" : "differs", ev.solved ? "ok" : "no");
+          R.cnt = { t: ev.solved ? "✓" : "×", c: ev.solved ? "ok" : "no" };
+          if (!R.quiet) toast(ev.solved ? "ok" : "no", (ev.solved ? "Verified" : "Not matched") + (S !== R ? " · " + R.name : ""), R.text);
+          if (S === R && !R.quiet) showPanel("ver"); break;
+        }
+      }
+    }
+    function handle(ev) { if (!R) return; apply(ev); if (S === R) paint(); if (R.doc && R.doc.folder) scheduleTree(); }
+
+    /* ---- run ---- */
+    const CALL_RE = /\bCALL\b/i, MAX_COBOL = 20000;
+    function expandCopies(text) {
+      const lib = project ? project.lib : null; let n = 0; const missing = [];
+      if (!lib) return { text, n, missing };
+      const re = /^([ \t]*)COPY[ \t]+([A-Za-z0-9_-]+)(?:[ \t]+(?:OF|IN)[ \t]+[A-Za-z0-9_-]+)?[ \t]*\.[ \t]*$/gim;
+      for (let depth = 0; depth < 5; depth++) {
+        let hit = false;
+        text = text.replace(re, (all, ind, name) => {
+          const body = lib.get(name.toUpperCase());
+          if (body === undefined) { if (!missing.includes(name)) missing.push(name); return all; }
+          hit = true; n++; return body.replace(/\n$/, "");
+        });
+        if (!hit) break;
+      }
+      return { text, n, missing };
+    }
+    function skipReason(text) {
+      if (CALL_RE.test(text)) return "uses CALL (not supported by this demo)";
+      if (text.length > MAX_COBOL) return "over " + nf.format(MAX_COBOL) + " characters";
+      if (!text.trim()) return "empty";
+      return "";
+    }
+    async function runDoc(d, opts) {
+      opts = opts || {};
+      const isActive = d === doc();
+      if (isActive) d.cobol = ta.value;
+      const say = (m) => { if (isActive) $("msg").textContent = m; };
+      const ex = expandCopies(d.cobol), why = skipReason(ex.text);
+      if (why) {
+        const m = why === "empty" ? "The program is empty." : why.startsWith("over") ? "Program is over the 20,000 character limit." : "The hosted demo does not run programs that use CALL.";
+        d.skip = why; say(m); if (!opts.quiet) toast("no", "Not run", m); renderFolder(); return false;
+      }
+      d.skip = "";
+      busy = true;["runb", "sideRun"].forEach((id) => { $(id).disabled = true; });
+      $("runLbl").textContent = "Verifying"; $("sideRunLbl").textContent = "Verifying";
+      const sp = el("span", "spin"); $("runb").insertBefore(sp, $("runb").firstChild);
+      say("");
+      R = d.res = newRes(); if (isActive) S = R; R.ph = 0; R.t0 = Date.now(); R.name = d.name; R.doc = d; R.quiet = !!opts.quiet; R.src = d.cobol; d.running = true;
+      R.log.push({ t: " ", k: "prompt", x: "$ parity verify " + (d.path || d.name) }); rstat("Starting", "busy");
+      if (ex.n) rlog("dim", "Filled in " + ex.n + " COPY statement" + (ex.n > 1 ? "s" : "") + " from the folder");
+      ex.missing.forEach((m) => rlog("warn", "COPY " + m + " was not found in the open folder"));
+      if (S === R) { paint(); if (!opts.quiet) showPanel("ver"); }
+      scheduleTree(); timer = setInterval(tickClock, 200);
+      try {
+        const resp = await fetch("/api/translate", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cobol: ex.text, inputs: d.inputs, tiers: ["ultra"] })
+        });
+        if (!resp.ok) {
+          let m = "The request failed."; try { m = (await resp.json()).error || m; } catch (e) { }
+          say(m); R.ph = -1; R.verdict = null; rstat("Not started", "no"); if (!R.quiet) toast("no", "Not started", m); rlog("err", m); return false;
+        }
+        const reader = resp.body.getReader(), dec = new TextDecoder(); let buf = "";
+        for (; ;) {
+          const { value, done } = await reader.read(); if (done) break;
+          buf += dec.decode(value, { stream: true });
+          let i; while ((i = buf.indexOf("\n\n")) >= 0) { const chunk = buf.slice(0, i); buf = buf.slice(i + 2); if (chunk.startsWith("data: ")) { try { handle(JSON.parse(chunk.slice(6))); } catch (e) { console.error(e); } } }
+        }
+      } catch (e) { say("Connection lost. Run it again."); rstat("Connection lost", "no"); rlog("err", "Connection lost"); }
+      finally {
+        clearInterval(timer); busy = false; d.running = false;["runb", "sideRun"].forEach((id) => { $(id).disabled = false; });
+        const s = $("runb").querySelector(".spin"); if (s) s.remove();
+        $("runLbl").textContent = "Verify"; $("sideRunLbl").textContent = "Verify translation";
+        R.busyLog = false; if (S === R) paint(); R = null; scheduleTree();
+      }
+      return true;
+    }
+    async function go() {
+      if (busy || batch) { if (batch) toast("no", "Folder conversion is running", "Wait for it to finish or press Stop."); return; }
+      const d = doc();
+      if (d.kind !== "cobol") { $("msg").textContent = "Open a COBOL file first."; toast("no", "Nothing to verify", "Create a new file and paste a program into it."); return; }
+      await runDoc(d, {});
+    }
+    $("runb").onclick = go; $("sideRun").onclick = go;
+
+    /* ---- clear results of the file on screen ---- */
+    $("clearRes").onclick = () => {
+      if (busy && S === R) { toast("no", "A run is in progress", "Wait for it to finish, then clear."); return; }
+      const d = doc(); d.res = newRes(); S = d.res; paint(); showPanel("ver");
+    };
+
+    /* ================= folders ================= */
+    let project = null;   // { name, lib: Map(UPPERCASE name -> text) } for the open folder
+    let batch = null;     // { stop, i, n, cur } while "Convert all" runs
+    const SKIP_DIR = /^(\.|node_modules$|__pycache__$)/;
+    const FOLDER_FILE = /\.(cob|cbl|cobol|cpy|copy|in)$/i;
+    async function readDirHandle(dh, base, out, depth) {
+      if (depth > 6) return;
+      for await (const [name, h] of dh.entries()) {
+        if (out.length >= 400) return;
+        if (h.kind === "directory") { if (!SKIP_DIR.test(name)) await readDirHandle(h, base + name + "/", out, depth + 1); }
+        else if (FOLDER_FILE.test(name)) out.push({ path: base + name, file: await h.getFile() });
+      }
+    }
+    async function openFolder() {
+      if (batch) { toast("no", "Folder conversion is running", "Wait for it to finish or press Stop."); return; }
+      try {
+        if (window.showDirectoryPicker) {
+          const dh = await window.showDirectoryPicker(), out = [];
+          await readDirHandle(dh, "", out, 0);
+          await loadProject(dh.name, out);
+        } else $("dirIn").click();
+      } catch (e) { if (!e || e.name !== "AbortError") toast("no", "Could not open the folder", (e && e.message) || String(e)); }
+    }
+    $("dirIn").addEventListener("change", async (e) => {
+      const fs = [...e.target.files]; e.target.value = ""; if (!fs.length) return;
+      const root = (fs[0].webkitRelativePath || "").split("/")[0] || "folder";
+      const out = fs.map((f) => ({ path: (f.webkitRelativePath || f.name).split("/").slice(1).join("/") || f.name, file: f }))
+        .filter((x) => FOLDER_FILE.test(x.path) && !x.path.split("/").some((p) => SKIP_DIR.test(p))).slice(0, 400);
+      await loadProject(root, out);
+    });
+    async function loadProject(name, entries) {
+      if (!entries.length) { toast("no", "No COBOL files found", "Looked for .cob, .cbl, .cobol, .cpy and .copy files in " + name + "."); return; }
+      if (docs.some((d) => d.folder && isDirty(d)) && !confirm("Replace the open folder? Unsaved edits to its files will be lost.")) return;
+      if (doc().kind === "cobol") doc().cobol = ta.value;
+      const cur = doc();
+      for (let k = docs.length - 1; k >= 0; k--) if (docs[k].folder) docs.splice(k, 1);
+      const texts = new Map(); let big = 0;
+      entries.sort((a, b) => {   // like the VS Code Explorer: folders first, then files, each A to Z
+        const x = a.path.split("/"), y = b.path.split("/");
+        for (let k = 0; k < Math.min(x.length, y.length); k++) {
+          const xd = k < x.length - 1, yd = k < y.length - 1;
+          if (xd !== yd) return xd ? -1 : 1;
+          const c = x[k].localeCompare(y[k], undefined, { numeric: true, sensitivity: "base" }); if (c) return c;
+        }
+        return x.length - y.length;
+      });
+      for (const e of entries) { if (e.file.size > 400000) { big++; continue; } texts.set(e.path, (await e.file.text()).replace(/\r\n/g, "\n")); }
+      const ins = new Map(), lib = new Map(), made = [];
+      for (const [path, text] of texts) {
+        const m = /^(.*\/)?([^\/]+)\.(\w+)$/.exec(path); if (!m) continue;
+        const dir = m[1] || "", base = m[2], ext = m[3].toLowerCase();
+        if (ext === "in") {
+          const mm = /^(.*?)(?:\.(\d+))?$/.exec(base), key = dir + mm[1];
+          if (!ins.has(key)) ins.set(key, []);
+          ins.get(key).push([+(mm[2] || 1), text]); continue;
+        }
+        lib.set(base.toUpperCase(), text);
+        made.push({
+          id: uid(), name: base + "." + m[3], path, kind: "cobol", cobol: text, inputs: [""], isel: 0, saved: text, handle: null, folder: true, open: false,
+          cpy: ext === "cpy" || ext === "copy", key: dir + base, skip: ""
+        });
+      }
+      made.forEach((d) => {
+        const list = ins.get(d.key);
+        if (list && !d.cpy) d.inputs = list.sort((a, b) => a[0] - b[0]).slice(0, 5).map((x) => x[1]);
+      });
+      docs.push(...made);
+      project = { name, lib };
+      made.forEach((d) => { if (!d.cpy) d.skip = skipReason(expandCopies(d.cobol).text); });
+      const progs = made.filter((d) => !d.cpy).length;
+      let idx = docs.indexOf(cur);
+      if (idx < 0) { idx = docs.findIndex((d) => d.open !== false); if (idx < 0) { docs.push({ id: "welcome", name: "Welcome", kind: "welcome" }); idx = docs.length - 1; } }
+      $("sectFolder").hidden = false; $("sectFolder").classList.remove("closed");
+      if ($("ide").classList.contains("nosb")) toggleSide();
+      activate(idx, true);
+      toast("ok", "Opened " + name, progs + " program" + (progs === 1 ? "" : "s") + ", " + (made.length - progs) + " copybook" + (made.length - progs === 1 ? "" : "s") + (big ? ", " + big + " skipped (over 400 KB)" : ""));
+    }
+    function openFolderDoc(d) { activate(docs.indexOf(d)); }
+    function docState(d) {
+      if (d.running) return ["run", "", "Converting"];
+      const r = d.res;
+      if (r && r.verdict && r.src === d.cobol) return r.verdict === "ok" ? ["ok", "✓", "Verified"] : ["no", "×", "Not matched"];
+      if (d.skip) return ["sk", "–", "Skipped: " + d.skip];
+      return ["", "", ""];
+    }
+    let treeT = 0;
+    function scheduleTree() { if (treeT) return; treeT = setTimeout(() => { treeT = 0; renderFolder(); }, 120); }
+    function renderFolder() {
+      const sect = $("sectFolder"), box = $("folderBody"), list = docs.filter((d) => d.folder);
+      if (!list.length) { sect.hidden = true; project = null; return; }
+      sect.hidden = false; box.replaceChildren();
+      const progs = list.filter((d) => !d.cpy);
+      let ok = 0, no = 0, sk = 0;
+      progs.forEach((d) => { const st = docState(d)[0]; if (st === "ok") ok++; else if (st === "no") no++; else if (st === "sk") sk++; });
+      const todo = progs.filter((d) => docState(d)[0] !== "ok" && !d.skip);
+      const head = el("div", "fold-head");
+      head.append(el("b", "", project ? project.name : "Folder"));
+      const sum = el("div", "fsum");
+      sum.append(document.createTextNode(progs.length + " program" + (progs.length === 1 ? "" : "s") + " · "), el("span", "ok", ok + " verified"), document.createTextNode(" · "), el("span", "no", no + " not matched"));
+      if (sk) sum.append(document.createTextNode(" · " + sk + " skipped"));
+      if (batch) sum.append(el("br"), document.createTextNode("Converting " + batch.i + " of " + batch.n + (batch.cur ? ": " + batch.cur : "")));
+      head.append(sum);
+      const act = el("div", "fold-act");
+      if (batch) {
+        const b = el("button", "btn sm alt", batch.stop ? "Stopping…" : "Stop after this file"); b.type = "button"; b.disabled = batch.stop; b.onclick = () => { batch.stop = true; renderFolder(); }; act.append(b);
+      } else {
+        const b = el("button", "btn sm", todo.length ? "Convert all (" + todo.length + ")" : "All verified"); b.type = "button"; b.disabled = !todo.length || busy; b.onclick = () => convertAll(); act.append(b);
+        const z = el("button", "btn sm alt", "Download Java (.zip)"); z.type = "button"; z.disabled = !progs.some((d) => d.res && d.res.java); z.onclick = () => downloadAllJava(); act.append(z);
+      }
+      head.append(act);
+      head.append(el("p", "fnote", "One file at a time. Each file is checked as its own program, on its own test inputs (NAME.in beside NAME.cob)."));
+      box.append(head);
+      let prev = [];
+      list.forEach((d) => {
+        const dirs = d.path.split("/").slice(0, -1);
+        let k = 0; while (k < dirs.length && k < prev.length && dirs[k] === prev[k]) k++;
+        for (let j = k; j < dirs.length; j++) { const r = el("div", "fdir", "▾ " + dirs[j]); r.style.setProperty("--d", String(j)); box.append(r); }
+        prev = dirs;
+        const b = el("button", "file tr" + (d.cpy ? " cp" : "")); b.type = "button"; b.style.setProperty("--d", String(dirs.length)); b.setAttribute("aria-current", String(docs[active] === d));
+        const st = docState(d), mark = el("span", "fs " + st[0], st[1]); if (st[2]) mark.title = st[2];
+        b.append(el("span", "fi", d.cpy ? "CPY" : "CBL"), el("span", "nm", d.name + (isDirty(d) ? "  ●" : "")), mark);
+        if (d.cpy) b.title = "Copybook: filled into programs that COPY it"; else if (st[2]) b.title = st[2];
+        b.onclick = () => openFolderDoc(d); box.append(b);
+      });
+    }
+    async function convertAll() {
+      if (busy || batch) return;
+      if (doc().kind === "cobol") doc().cobol = ta.value;
+      const progs = docs.filter((d) => d.folder && !d.cpy);
+      progs.forEach((d) => { d.skip = skipReason(expandCopies(d.cobol).text); });
+      const todo = progs.filter((d) => !d.skip && docState(d)[0] !== "ok");
+      if (!todo.length) { toast("no", "Nothing to convert", "Every program is verified or skipped."); renderFolder(); return; }
+      batch = { stop: false, i: 0, n: todo.length, cur: "" };
+      for (const d of todo) {
+        if (batch.stop) break;
+        batch.i++; batch.cur = d.name; renderFolder();
+        await runDoc(d, { quiet: true });
+      }
+      const stopped = batch.stop, done = batch.i; batch = null; renderFolder();
+      const ok = progs.filter((d) => docState(d)[0] === "ok").length;
+      toast(ok === progs.length ? "ok" : "no", stopped ? "Stopped" : "Folder finished", ok + " of " + progs.length + " programs verified" + (stopped ? " (stopped after " + done + ")" : "") + ". Open a file to see its result.");
+    }
+    const CRC_T = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+    function crc32(b) { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = CRC_T[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+    function makeZip(files) {   // stored (no compression); files: [{name, data: string}]
+      const enc = new TextEncoder(), parts = [], cen = [];
+      const u16 = (v) => [v & 255, (v >> 8) & 255], u32 = (v) => [v & 255, (v >> 8) & 255, (v >> 16) & 255, (v >> 24) & 255];
+      const now = new Date(), dt = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate(), tm = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
+      let off = 0;
+      for (const f of files) {
+        const nb = enc.encode(f.name), db = enc.encode(f.data), crc = crc32(db);
+        const lh = new Uint8Array([0x50, 0x4b, 3, 4, ...u16(20), ...u16(0x0800), ...u16(0), ...u16(tm), ...u16(dt), ...u32(crc), ...u32(db.length), ...u32(db.length), ...u16(nb.length), ...u16(0)]);
+        parts.push(lh, nb, db);
+        cen.push(new Uint8Array([0x50, 0x4b, 1, 2, ...u16(20), ...u16(20), ...u16(0x0800), ...u16(0), ...u16(tm), ...u16(dt), ...u32(crc), ...u32(db.length), ...u32(db.length), ...u16(nb.length), ...u16(0), ...u16(0), ...u16(0), ...u16(0), ...u32(0), ...u32(off)]), nb);
+        off += lh.length + nb.length + db.length;
+      }
+      let csz = 0; cen.forEach((c) => { csz += c.length; });
+      const end = new Uint8Array([0x50, 0x4b, 5, 6, ...u16(0), ...u16(0), ...u16(files.length), ...u16(files.length), ...u32(csz), ...u32(off), ...u16(0)]);
+      return new Blob([...parts, ...cen, end], { type: "application/zip" });
+    }
+    function downloadAllJava() {
+      const progs = docs.filter((d) => d.folder && !d.cpy), files = [], rep = [];
+      rep.push("Parity folder report: " + (project ? project.name : ""), "Each program was checked by running the COBOL and the Java on its test inputs and comparing the output.",
+        "That is differential testing on those inputs, not a proof of equivalence.", "");
+      progs.forEach((d) => {
+        const r = d.res, st = docState(d), verified = st[0] === "ok", base = d.path.replace(/\.[^.\/]+$/, "");
+        if (r && r.java) files.push({ name: (verified ? "" : "NOT-VERIFIED/") + base + "/Main.java", data: r.java });
+        rep.push(d.path + "\t" + (verified ? "verified" : st[0] === "no" ? "NOT matched" : d.skip ? "skipped: " + d.skip : r && r.java ? "stale (edited after the run)" : "not run") +
+          (r && r.verdict ? "\t" + r.nAtt + " attempt" + (r.nAtt === 1 ? "" : "s") + "\t" + nf.format(r.tok) + " tokens out\t" + r.time : ""));
+      });
+      files.push({ name: "REPORT.txt", data: rep.join("\n") + "\n" });
+      if (files.length < 2) { toast("no", "No Java yet", "Convert the folder first."); return; }
+      const u = URL.createObjectURL(makeZip(files)), a = document.createElement("a");
+      a.href = u; a.download = ((project && project.name) || "parity") + "-java.zip"; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 3000);
+    }
+
+    /* ================= assistant ================= */
+    const chat = { open: false, msgs: [], busy: false, ctl: null };
+    const CHIPS = [["Explain this program", "Explain what this program does, step by step, in plain language."],
+    ["Explain the selection", "Explain the part of the code I selected."],
+    ["Why didn't it match?", "Why did the Java output differ from the COBOL output? Name the COBOL rule behind it."],
+    ["Add comments", "Rewrite this COBOL file with short explanatory comments. Do not change any code."],
+    ["Write COBOL…", "Write a COBOL program that "]];
+    function toggleChat(force) {
+      chat.open = force === undefined ? !chat.open : !!force;
+      $("ide").classList.toggle("chat-open", chat.open); $("abChat").setAttribute("aria-pressed", String(chat.open));
+      if (chat.open) {
+        if (window.innerWidth < 1400 && window.innerWidth > 900 && !$("ide").classList.contains("nosb")) toggleSide();   // make room for the panel
+        renderChat(); $("chIn").focus();
+      }
+    }
+    $("abChat").onclick = () => toggleChat(); $("chClose").onclick = () => toggleChat(false);
+    $("chClear").onclick = () => { if (chat.busy && chat.ctl) chat.ctl.abort(); chat.msgs = []; chat.busy = false; renderChat(); };
+    $("chStop").onclick = () => { if (chat.ctl) chat.ctl.abort(); };
+    $("chSend").onclick = () => sendChat();
+    $("chIn").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); sendChat(); } });
+    (function () {
+      const box = $("chChips");
+      CHIPS.forEach(([label, text]) => {
+        const b = el("button", "chip", label); b.type = "button";
+        b.onclick = () => { if (text.endsWith(" ")) { $("chIn").value = text; $("chIn").focus(); } else sendChat(text); };
+        box.append(b);
+      });
+    })();
+    function chatContext() {
+      const d = doc(), c = {};
+      if (d.kind !== "cobol") return c;
+      c.file = d.path || d.name; c.cobol = ta.value;
+      const sel = ta.value.slice(ta.selectionStart, ta.selectionEnd); if (sel.trim()) c.selection = sel;
+      if (S.java) c.java = S.java;
+      if (S.verdict) c.verdict = (S.verdict === "ok" ? "Outputs match. " : "Outputs do not match. ") + S.text;
+      const bad = S.tests.find((x) => !x.ok);
+      if (bad) c.detail = bad.compileError ? "The Java did not compile:\n" + bad.compileError : "stdin: " + JSON.stringify(bad.stdin || "") + "\nCOBOL output:\n" + bad.expected + "\nJava output:\n" + bad.actual;
+      return c;
+    }
+    function inlineMd(parent, text) {
+      text.split(/(`[^`\n]+`|\*\*[^*\n]+\*\*)/).forEach((p) => {
+        if (!p) return;
+        if (p.length > 2 && p[0] === "`") parent.append(el("code", "ic", p.slice(1, -1)));
+        else if (p.startsWith("**") && p.endsWith("**") && p.length > 4) parent.append(el("b", "", p.slice(2, -2)));
+        else parent.append(document.createTextNode(p));
+      });
+    }
+    function textBlocks(box, text) {
+      text.split(/\n{2,}/).forEach((para) => {
+        const lines = para.split("\n").filter((l) => l.trim()); if (!lines.length) return;
+        if (lines.every((l) => /^\s*([-*]|\d+[.)])\s+/.test(l))) {
+          const ol = /^\s*\d/.test(lines[0]), list = el(ol ? "ol" : "ul");
+          lines.forEach((l) => { const li = el("li"); inlineMd(li, l.replace(/^\s*([-*]|\d+[.)])\s+/, "")); list.append(li); }); box.append(list);
+        } else { const p = el("p"); lines.forEach((l, i) => { if (i) p.append(el("br")); inlineMd(p, l.replace(/^#{1,4}\s+/, "")); }); box.append(p); }
+      });
+    }
+    function applyToEditor(code, verify) {
+      code = code.replace(/\n*$/, "\n");
+      if (batch || busy) { toast("no", "A run is in progress", "Wait for it to finish, then apply."); return; }
+      if (doc().kind !== "cobol") addDoc("assistant.cob", code);
+      else { ta.focus(); ta.select(); insertText(code); doc().cobol = ta.value; }
+      toast("ok", "Applied to the editor", "Ctrl+Z undoes it. Press Verify to check the new COBOL.");
+      if (verify) go();
+    }
+    function codeBlock(lang, code, closed) {
+      const cb = el("div", "cb"), h = el("div", "cb-h");
+      const l = (lang || "").toLowerCase(), isCob = l === "cobol" || l === "cbl", isJava = l === "java";
+      h.append(el("span", "", isCob ? "COBOL" : isJava ? "Java" : l || "code"), el("span", "sp"));
+      const add = (label, fn) => { const b = el("button", "ghost", label); b.type = "button"; b.onclick = () => fn(b); h.append(b); };
+      if (closed) {
+        if (isCob) {
+          add("Apply", () => applyToEditor(code, false)); add("Apply & verify", () => applyToEditor(code, true));
+          add("New file", () => { untitled++; addDoc("assistant-" + untitled + ".cob", code.replace(/\n*$/, "\n")); });
+        }
+        if (isJava) add("Save .java", () => downloadText("Main.java", code.replace(/\n*$/, "\n")));
+        add("Copy", (b) => copyText(code, b));
+      }
+      const pre = el("pre"); pre.textContent = code; cb.append(h, pre); return cb;
+    }
+    function renderMsgBody(box, text) {
+      const re = /```([A-Za-z0-9_+-]*)[ \t]*\n/g; let last = 0, m;
+      while ((m = re.exec(text))) {
+        if (m.index > last) textBlocks(box, text.slice(last, m.index));
+        const start = re.lastIndex, endAt = text.indexOf("```", start), closed = endAt >= 0;
+        box.append(codeBlock(m[1], text.slice(start, closed ? endAt : text.length).replace(/\n$/, ""), closed));
+        last = closed ? endAt + 3 : text.length; re.lastIndex = last;
+      }
+      if (last < text.length) textBlocks(box, text.slice(last));
+    }
+    let chatRaf = 0;
+    function renderChat() {
+      if (chatRaf) return;
+      chatRaf = requestAnimationFrame(() => {
+        chatRaf = 0;
+        const box = $("chMsgs"), atEnd = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
+        box.replaceChildren();
+        if (!chat.msgs.length) {
+          const e = el("div", "ch-empty");
+          e.append(el("b", "", "Ask anything about the open file."), el("br"), document.createTextNode("Explain a confusing part, change the code with a prompt, or write new COBOL or Java. COBOL it writes comes with an Apply & verify button, so Parity can check it."));
+          box.append(e);
+        }
+        chat.msgs.forEach((m) => {
+          if (m.role === "user") { box.append(el("div", "cm u", m.content)); return; }
+          const d = el("div", "cm a");
+          if (m.content) renderMsgBody(d, m.content);
+          if (m.pending) d.append(el("div", "meta dots", m.thinking && !m.content ? "Thinking" : m.content ? "" : "Working"));
+          if (m.error) d.append(el("div", "err", m.error));
+          if (m.meta) d.append(el("div", "meta", m.meta));
+          box.append(d);
+        });
+        $("chSend").disabled = chat.busy; $("chStop").hidden = !chat.busy;
+        if (atEnd) box.scrollTop = box.scrollHeight;
+      });
+    }
+    async function sendChat(text) {
+      text = (text === undefined ? $("chIn").value : text).trim();
+      if (!text || chat.busy) return;
+      if (!chat.open) toggleChat(true);
+      const history = chat.msgs.filter((m) => !m.error || m.content).map((m) => ({ role: m.role, content: m.content }));
+      chat.msgs.push({ role: "user", content: text });
+      const a = { role: "assistant", content: "", pending: true }; chat.msgs.push(a);
+      $("chIn").value = ""; chat.busy = true; chat.ctl = new AbortController(); renderChat();
+      try {
+        const resp = await fetch("/api/chat", {
+          method: "POST", headers: { "Content-Type": "application/json" }, signal: chat.ctl.signal,
+          body: JSON.stringify({ messages: history.concat([{ role: "user", content: text }]), context: chatContext(), think: $("chThink").checked })
+        });
+        if (!resp.ok) { let m = "The request failed."; try { m = (await resp.json()).error || m; } catch (e) { } a.error = m; return; }
+        const reader = resp.body.getReader(), dec = new TextDecoder(); let buf = "";
+        for (; ;) {
+          const { value, done } = await reader.read(); if (done) break;
+          buf += dec.decode(value, { stream: true });
+          let i; while ((i = buf.indexOf("\n\n")) >= 0) {
+            const chunk = buf.slice(0, i); buf = buf.slice(i + 2); if (!chunk.startsWith("data: ")) continue;
+            let ev; try { ev = JSON.parse(chunk.slice(6)); } catch (e) { continue; }
+            if (ev.type === "delta") { a.content += ev.text; a.thinking = false; }
+            else if (ev.type === "thinking") a.thinking = true;
+            else if (ev.type === "error") a.error = ev.text;
+            else if (ev.type === "done") a.meta = ev.finish === "length" || ev.finish === "timeout" ? "The reply was cut off (" + (ev.finish === "timeout" ? "time" : "length") + " limit)." : ev.secs + "s, " + nf.format(ev.tout) + " tokens";
+            renderChat();
+          }
+        }
+      } catch (e) { if (e && e.name === "AbortError") a.meta = "Stopped."; else a.error = "Connection lost. Send it again."; }
+      finally { a.pending = false; chat.busy = false; chat.ctl = null; renderChat(); }
+    }
+
+    /* ---- keyboard ---- */
+    let chord = 0;
+    document.addEventListener("keydown", (e) => {
+      const mod = e.ctrlKey || e.metaKey;
+      if (e.key === "Escape") closeMenus();
+      if (mod && e.key === "Enter") { e.preventDefault(); go(); return; }
+      if (mod && !e.altKey && (e.key === "s" || e.key === "S")) { e.preventDefault(); saveDoc(doc(), e.shiftKey); return; }
+      if (mod && !e.altKey && !e.shiftKey && (e.key === "o" || e.key === "O")) { e.preventDefault(); openFiles(); return; }
+      if (mod && !e.altKey && !e.shiftKey && (e.key === "b" || e.key === "B")) { e.preventDefault(); toggleSide(); return; }
+      if (mod && e.altKey && e.code === "KeyN") { e.preventDefault(); newFile(); return; }
+      if (mod && e.altKey && e.code === "KeyA") { e.preventDefault(); toggleChat(); return; }
+      if (mod && e.altKey && e.code === "KeyW") { e.preventDefault(); closeDoc(active); return; }
+      if (mod && e.shiftKey && (e.key === "P" || e.key === "p")) { e.preventDefault(); qpOpen(); return; }
+      if (mod && (e.key === "k" || e.key === "K")) { e.preventDefault(); chord = Date.now(); return; }
+      if (mod && (e.key === "t" || e.key === "T") && Date.now() - chord < 1500) { e.preventDefault(); chord = 0; qpOpen(); }
+    });
+
+    /* ---- boot ---- */
+    if (window.matchMedia("(max-width:900px)").matches) { $("ide").classList.add("nosb"); $("abExp").setAttribute("aria-pressed", "false"); }
+    if (!restore()) newFile(true);
+    renderVerify(); showPanel("ver");
+  </script>
+</body>
+
+</html>
