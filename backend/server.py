@@ -14,6 +14,7 @@ Needs the same .env as parity.py, plus cobc and a JDK on PATH.
 import json
 import ctypes
 import ipaddress
+import logging
 import math
 import os
 import queue
@@ -28,6 +29,10 @@ from pathlib import Path
 
 import assistant
 import parity
+from safe_logging import log_exception
+
+logger = logging.getLogger(__name__)
+GENERIC_SSE_ERROR = "Something went wrong. Try again."
 
 parity.SAFE = True
 ISOLATION_STATUS = "failed"
@@ -166,6 +171,12 @@ def over_budget():
 
 
 BUDGET_MSG = "The demo's AI budget is used up, so it is paused. Please contact the author."
+
+
+class BudgetExceeded(RuntimeError):
+    """Known SSE failure that is safe to show to the client."""
+
+
 slots = threading.BoundedSemaphore(int(os.environ.get("PARITY_MAX_JOBS", "2")))
 _count = {"day": time.strftime("%Y-%m-%d"), "n": 0}
 _count_lock = threading.Lock()
@@ -394,12 +405,14 @@ class Handler(BaseHTTPRequestHandler):
                     t = ev.get("type")
                     if t in ("model_reply", "usage") or (t == "done" and "tin" in ev):
                         if not add_spend(ev.get("tin"), ev.get("tout")) or over_budget():
-                            raise RuntimeError(BUDGET_MSG)
+                            raise BudgetExceeded(BUDGET_MSG)
                     q.put(ev)
 
                 job(emit)
             except Exception as e:  # noqa: BLE001
-                q.put({"type": "error", "text": f"{type(e).__name__}: {str(e)[:200]}"})
+                log_exception(logger, "Unhandled exception in SSE worker", e)
+                message = BUDGET_MSG if isinstance(e, BudgetExceeded) else GENERIC_SSE_ERROR
+                q.put({"type": "error", "text": message})
             finally:
                 sem.release()
                 q.put(None)
@@ -466,6 +479,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
+    logging.basicConfig(stream=sys.stderr, level=logging.ERROR)
     port = int(os.environ.get("PORT", "8000"))
     initialize_isolation()
     srv = ThreadingHTTPServer(("0.0.0.0", port), Handler)

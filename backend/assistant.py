@@ -6,9 +6,13 @@ The server calls stream(body, emit). body is JSON from the UI:
   think     bool   let the model reason first (slower)
 emit(dict) is called with {"type": "delta", "text"} pieces, then {"type": "done", ...}.
 """
+import logging
 import time
 
 import parity
+from safe_logging import log_exception
+
+logger = logging.getLogger(__name__)
 
 MAX_MSGS = 14          # chat turns kept per request
 MAX_MSG_CHARS = 8_000  # per turn
@@ -120,10 +124,11 @@ def stream(body, emit):
                     pass
                 break
     except Exception as e:  # noqa: BLE001
+        log_exception(logger, "Assistant model call failed", e)
         tin = parity.estimate_tokens("\n".join(m["content"] for m in messages))
         tout = max(1, (out_chars + reasoning_chars + 3) // 4)
         emit(type="usage", tin=tin, tout=tout, usage_estimated=True)
-        emit(type="error", text=f"The model call failed: {type(e).__name__}: {str(e)[:160]}")
+        emit(type="error", text="Something went wrong. Try again.")
         return
     if out_chars == 0:
         tin = getattr(usage, "prompt_tokens", None) if usage else None

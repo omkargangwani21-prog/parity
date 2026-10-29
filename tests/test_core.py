@@ -1,8 +1,10 @@
 """Pure local checks for input validation, comparisons, and spend protection."""
 import json
+import io
 import os
 import sys
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -120,6 +122,52 @@ class ContentLengthTests(unittest.TestCase):
         _, input_error = server.validate({"cobol": program,
                                           "inputs": ["x" * (server.MAX_INPUT_LEN + 1)]})
         self.assertIn("test input", input_error)
+
+
+class ResponseErrorTests(unittest.TestCase):
+    def test_sse_exception_details_are_not_sent_to_client(self):
+        fake_path = "/tmp/private/fake-request.json"
+        fake_key = "fake-api-key-never-log-this"
+        fake_header = "fake-header-value-never-log-this"
+        handler = object.__new__(server.Handler)
+        handler.wfile = io.BytesIO()
+
+        def fail(_emit):
+            raise RuntimeError(
+                f"provider failed at {fake_path}; api_key={fake_key}; "
+                f"headers={{'Authorization': 'Bearer {fake_header}'}}")
+
+        with patch.dict(os.environ, {"NEBIUS_API_KEY": fake_key}), \
+                patch.object(handler, "send_response"), \
+                patch.object(handler, "send_header"), \
+                patch.object(handler, "end_headers"), \
+                self.assertLogs(server.logger, level="ERROR") as captured:
+            handler._sse(fail, threading.Semaphore(1))
+
+        response = handler.wfile.getvalue().decode()
+        self.assertIn(server.GENERIC_SSE_ERROR, response)
+        self.assertNotIn(fake_path, response)
+        self.assertNotIn(fake_key, response)
+        self.assertNotIn(fake_header, response)
+        self.assertNotIn(fake_key, "\n".join(captured.output))
+        self.assertNotIn(fake_header, "\n".join(captured.output))
+
+    def test_assistant_provider_exception_is_generic(self):
+        fake_path = "/tmp/private/fake-request.json"
+        fake_key = "fake-api-key-never-log-this"
+        events = []
+
+        with patch.dict(os.environ, {"NEBIUS_API_KEY": fake_key}), \
+                patch.object(assistant.parity, "client",
+                             side_effect=RuntimeError(f"failed {fake_path} key={fake_key}")), \
+                self.assertLogs(assistant.logger, level="ERROR"):
+            assistant.stream({"messages": [{"role": "user", "content": "hello"}]},
+                             lambda **event: events.append(event))
+
+        errors = [event["text"] for event in events if event.get("type") == "error"]
+        self.assertEqual(errors, [server.GENERIC_SSE_ERROR])
+        self.assertNotIn(fake_path, " ".join(errors))
+        self.assertNotIn(fake_key, " ".join(errors))
 
 
 class SpendGuardTests(unittest.TestCase):
