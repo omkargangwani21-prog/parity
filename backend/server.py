@@ -12,12 +12,14 @@ Run:  python server.py            (PORT env var, default 8000)
 Needs the same .env as parity.py, plus cobc and a JDK on PATH.
 """
 import json
+import ctypes
 import ipaddress
 import math
 import os
 import queue
 import re
 import socket
+import sys
 import tempfile
 import threading
 import time
@@ -28,6 +30,7 @@ import assistant
 import parity
 
 parity.SAFE = True
+ISOLATION_STATUS = "failed"
 HERE = Path(__file__).resolve().parent.parent
 FRONTEND = HERE / "frontend"
 EXAMPLES = HERE / "examples"
@@ -56,6 +59,44 @@ PRICE_IN = float(os.environ.get("PARITY_PRICE_IN", parity.PRICES["ultra"]["in"] 
 PRICE_OUT = float(os.environ.get("PARITY_PRICE_OUT", parity.PRICES["ultra"]["out"]))
 SPEND_FILE = HERE / "results" / "spend.json"
 _spend_lock = threading.Lock()
+
+
+def isolation_self_test(run_child=None):
+    """Verify an untrusted child cannot read this process's environment."""
+    if not sys.platform.startswith("linux"):
+        return "ok"
+    run_child = run_child or parity.run
+    try:
+        with tempfile.TemporaryDirectory() as td:
+            rc, _out, err = run_child(["cat", f"/proc/{os.getpid()}/environ"],
+                                      timeout=5, tmpdir=td)
+    except Exception:
+        return "failed"
+    if rc == 0:
+        return "failed"
+    return "ok" if "permission denied" in str(err).lower() else "failed"
+
+
+def initialize_isolation():
+    """Harden proc access and cache the child-read self-test at server startup."""
+    global ISOLATION_STATUS
+    if not parity.SAFE or not sys.platform.startswith("linux"):
+        ISOLATION_STATUS = "ok"
+        return ISOLATION_STATUS
+    try:
+        libc = ctypes.CDLL(None, use_errno=True)
+        prctl = libc.prctl
+        prctl.restype = ctypes.c_int
+        dumpable_disabled = prctl(ctypes.c_int(4), ctypes.c_ulong(0), ctypes.c_ulong(0),
+                                  ctypes.c_ulong(0), ctypes.c_ulong(0)) == 0
+    except (AttributeError, OSError):
+        dumpable_disabled = False
+    ISOLATION_STATUS = isolation_self_test() if dumpable_disabled else "failed"
+    if ISOLATION_STATUS == "ok":
+        print("isolation check passed", flush=True)
+    else:
+        print("ISOLATION CHECK FAILED: generated code could read the server environment", flush=True)
+    return ISOLATION_STATUS
 
 
 def _load_spend(path):
@@ -280,7 +321,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = self.path.split("?")[0]
-        if path in ("/", "/index.html"):
+        if path == "/api/health":
+            self._json(200, {"isolation": ISOLATION_STATUS})
+        elif path in ("/", "/index.html"):
             self._send(200, (FRONTEND / "index.html").read_bytes(), "text/html; charset=utf-8")
         elif path == "/api/samples":
             out = []
@@ -385,6 +428,8 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         if self.path not in ("/api/translate", "/api/chat"):
             return self._send(404, "not found", "text/plain")
+        if parity.SAFE and ISOLATION_STATUS != "ok":
+            return self._json(503, {"error": "Server isolation check failed, translation disabled"})
         body = self._read_body()
         if body is None:
             return
@@ -422,6 +467,7 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     port = int(os.environ.get("PORT", "8000"))
+    initialize_isolation()
     srv = ThreadingHTTPServer(("0.0.0.0", port), Handler)
     print(f"Parity UI on http://localhost:{port}")
     srv.serve_forever()

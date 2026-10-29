@@ -39,6 +39,37 @@ class ChildEnvironmentTests(unittest.TestCase):
         self.assertIn("exceeded the 1 MB output limit", err)
 
 
+class IsolationTests(unittest.TestCase):
+    @unittest.skipUnless(sys.platform.startswith("linux"), "Linux-only isolation check")
+    def test_self_test_fails_when_child_reads_environ(self):
+        status = server.isolation_self_test(
+            lambda *args, **kwargs: (0, b"PATH=/secret", ""))
+        self.assertEqual(status, "failed")
+
+    @unittest.skipUnless(sys.platform.startswith("linux"), "Linux-only isolation check")
+    def test_self_test_passes_on_permission_denied(self):
+        status = server.isolation_self_test(
+            lambda *args, **kwargs: (1, "", "cat: /proc/123/environ: Permission denied"))
+        self.assertEqual(status, "ok")
+
+    def test_translate_refuses_when_isolation_failed(self):
+        handler = object.__new__(server.Handler)
+        handler.path = "/api/translate"
+        with patch.object(server, "ISOLATION_STATUS", "failed"), \
+                patch.object(server.Handler, "_json") as send_json:
+            server.Handler.do_POST(handler)
+        send_json.assert_called_once_with(
+            503, {"error": "Server isolation check failed, translation disabled"})
+
+    def test_health_reports_cached_isolation_status(self):
+        handler = object.__new__(server.Handler)
+        handler.path = "/api/health"
+        with patch.object(server, "ISOLATION_STATUS", "ok"), \
+                patch.object(server.Handler, "_json") as send_json:
+            server.Handler.do_GET(handler)
+        send_json.assert_called_once_with(200, {"isolation": "ok"})
+
+
 class CompareTests(unittest.TestCase):
     def test_strict_compare_normalizes_only_one_final_newline(self):
         self.assertEqual(parity.norm("A\n"), parity.norm("A"))
