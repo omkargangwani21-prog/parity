@@ -18,3 +18,6 @@ usage.json
 *.usage.json
 *.log
 .DS_Store
+
+*.orig
+*.rej
