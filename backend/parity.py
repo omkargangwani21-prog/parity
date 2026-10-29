@@ -129,7 +129,14 @@ SYSTEM = (
     "If the COBOL does not MOVE 0 (or INITIALIZE) to the counter before an INSPECT, the count keeps "
     "accumulating every time the INSPECT runs (for example inside a PERFORM VARYING loop over several "
     "records), so the Java must NOT reset the counter either. Reset the Java counter only at the points "
-    "where the COBOL resets it."
+    "where the COBOL resets it.\n"
+    "16. The V in a PICTURE is an implied decimal point: it marks where the decimal point sits and takes "
+    "no storage. It never divides or multiplies a value. MOVE 100000.00 (or VALUE 100000.00) into "
+    "PIC 9(7)V99 stores 100000.00. A number read with ACCEPT or FUNCTION NUMVAL that has no decimal point, "
+    "for example 1200000, stored into PIC 9(9)V99 is 1200000.00, and 100 is 100.00. Never shift the decimal "
+    "point of a value that is already a number. Only raw digit characters taken from an alphanumeric "
+    "(PIC X) item, for example through a REDEFINES table of VALUE strings, are read with the V position: "
+    "the digits 000125050 viewed as PIC 9(7)V99 mean 1250.50."
 )
 
 _client = None
