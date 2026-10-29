@@ -25,3 +25,5 @@ above and should not be read as a guaranteed rate.
 
 CodeNet files are not redistributed here; `benchmark/build_bench.py` and
 `benchmark/extract_codenet.py` rebuild the set from the public dataset.
+
+Note: the stress figures above were produced by an earlier version of backend/stress.py that asked the model for a JSON array of inputs. The current version asks for delimited blocks (with a JSON fallback) and is covered by unit tests; it has not been re-run on the full set.
