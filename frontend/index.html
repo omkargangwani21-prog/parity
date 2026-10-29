@@ -2836,6 +2836,8 @@
       if (t) t.classList.toggle("dirty", isDirty(d));
       setTitle();
     }
+    // an untitled file that was never edited is not worth keeping: it must not come back on the next visit
+    function isBlankUntitled(d) { return /^untitled-\d+\.cob$/.test(String(d.name || "")) && String(d.cobol || "") === TEMPLATE; }
     let saveT = null;
     function persist() {
       clearTimeout(saveT);
@@ -2844,7 +2846,7 @@
           if (doc().kind === "cobol") doc().cobol = ta.value;
           localStorage.setItem("parity.docs", JSON.stringify({
             untitled, active: doc().id,
-            docs: docs.filter((d) => d.kind === "cobol" && !d.folder).map((d) => ({ id: d.id, name: d.name, cobol: d.cobol, inputs: d.inputs, isel: d.isel, saved: d.saved }))
+            docs: docs.filter((d) => d.kind === "cobol" && !d.folder && !isBlankUntitled(d)).map((d) => ({ id: d.id, name: d.name, cobol: d.cobol, inputs: d.inputs, isel: d.isel, saved: d.saved }))
           }));
         } catch (e) { }
       }, 300);
@@ -2852,7 +2854,9 @@
     function restore() {
       try {
         const s = JSON.parse(localStorage.getItem("parity.docs") || "null");
-        if (!s || !Array.isArray(s.docs) || !s.docs.length) return false;
+        if (!s || !Array.isArray(s.docs)) return false;
+        s.docs = s.docs.filter((d) => !isBlankUntitled(d));
+        if (!s.docs.length) return false;
         untitled = +s.untitled || 0;
         s.docs.forEach((d) => docs.push({
           id: String(d.id || uid()), name: String(d.name || "untitled.cob"), kind: "cobol", cobol: String(d.cobol || ""),
@@ -3696,7 +3700,7 @@
 
     /* ---- boot ---- */
     if (window.matchMedia("(max-width:900px)").matches) { $("ide").classList.add("nosb"); $("abExp").setAttribute("aria-pressed", "false"); }
-    if (!restore()) newFile(true);
+    if (!restore()) activate(0, true);   // first visit: the Welcome page, not a blank file
     renderVerify(); showPanel("ver");
   </script>
 </body>
