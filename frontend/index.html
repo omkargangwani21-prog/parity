@@ -2007,6 +2007,78 @@
       padding-left: calc(22px + var(--d, 0)*12px)
     }
 
+    .trow {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      width: 100%;
+      padding: 3px 10px 3px calc(8px + var(--d, 0)*14px);
+      font-size: 13px;
+      line-height: 20px;
+      color: var(--fg);
+      text-align: left;
+      background-repeat: no-repeat;
+      background-image: repeating-linear-gradient(90deg, transparent 0, transparent 13px, var(--border) 13px, var(--border) 14px);
+      background-size: calc(var(--d, 0)*14px) 100%;
+      background-position: 1px 0
+    }
+
+    .trow:hover {
+      background-color: var(--hover)
+    }
+
+    .file.trow {
+      padding-left: calc(8px + var(--d, 0)*14px)
+    }
+
+    .trow .tc {
+      width: 12px;
+      height: 12px;
+      flex: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg2);
+      transition: transform .1s
+    }
+
+    .trow.open>.tc {
+      transform: rotate(90deg)
+    }
+
+    .trow .ti {
+      width: 16px;
+      height: 16px;
+      flex: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .trow.dir {
+      cursor: pointer
+    }
+
+    .trow.dir .ti {
+      color: #c09553
+    }
+
+    .trow.root {
+      font-weight: 600
+    }
+
+    .file.trow .ti {
+      color: var(--accent)
+    }
+
+    :root[data-theme="monokai"] .file.trow .ti {
+      color: var(--kw)
+    }
+
+    .file.trow.cp .ti {
+      color: var(--fg3)
+    }
+
     .file.cp {
       color: var(--fg3)
     }
@@ -2475,6 +2547,10 @@
         <button class="sx" type="button" data-sect="sectSamples"><span class="chev"></span>Files</button>
         <div class="sbody" id="fileList"></div>
       </div>
+      <div class="sect" id="sectFolder" hidden>
+        <button class="sx" type="button" data-sect="sectFolder"><span class="chev"></span>Folder</button>
+        <div class="sbody" id="folderBody"></div>
+      </div>
       <div class="sect" id="sectVerify">
         <button class="sx" type="button" data-sect="sectVerify"><span class="chev"></span>Verify</button>
         <div class="sbody vbody">
@@ -2483,10 +2559,6 @@
           <p class="msg" id="msg" role="status"></p>
           <div class="modelnote" id="models"></div>
         </div>
-      </div>
-      <div class="sect" id="sectFolder" hidden>
-        <button class="sx" type="button" data-sect="sectFolder"><span class="chev"></span>Folder</button>
-        <div class="sbody" id="folderBody"></div>
       </div>
     </aside>
 
@@ -3360,6 +3432,7 @@
     };
 
     /* ================= folders ================= */
+    const treeClosed = new Set();   // collapsed folder paths ("" = the root)
     let project = null;   // { name, lib: Map(UPPERCASE name -> text) } for the open folder
     let batch = null;     // { stop, i, n, cur } while "Convert all" runs
     const SKIP_DIR = /^(\.|node_modules$|__pycache__$)/;
@@ -3426,7 +3499,7 @@
         if (list && !d.cpy) d.inputs = list.sort((a, b) => a[0] - b[0]).slice(0, 5).map((x) => x[1]);
       });
       docs.push(...made);
-      project = { name, lib };
+      project = { name, lib }; treeClosed.clear();
       made.forEach((d) => { if (!d.cpy) d.skip = skipReason(expandCopies(d.cobol).text); });
       const progs = made.filter((d) => !d.cpy).length;
       let idx = docs.indexOf(cur);
@@ -3455,7 +3528,6 @@
       progs.forEach((d) => { const st = docState(d)[0]; if (st === "ok") ok++; else if (st === "no") no++; else if (st === "sk") sk++; });
       const todo = progs.filter((d) => docState(d)[0] !== "ok" && !d.skip);
       const head = el("div", "fold-head");
-      head.append(el("b", "", project ? project.name : "Folder"));
       const sum = el("div", "fsum");
       sum.append(document.createTextNode(progs.length + " program" + (progs.length === 1 ? "" : "s") + " · "), el("span", "ok", ok + " verified"), document.createTextNode(" · "), el("span", "no", no + " not matched"));
       if (sk) sum.append(document.createTextNode(" · " + sk + " skipped"));
@@ -3469,17 +3541,41 @@
         const z = el("button", "btn sm alt", "Download Java (.zip)"); z.type = "button"; z.disabled = !progs.some((d) => d.res && d.res.java); z.onclick = () => downloadAllJava(); act.append(z);
       }
       head.append(act);
-      head.append(el("p", "fnote", "One file at a time. Each file is checked as its own program, on its own test inputs (NAME.in beside NAME.cob)."));
+      head.title = "One file at a time. Each file is checked as its own program, on its own test inputs (NAME.in beside NAME.cob).";
       box.append(head);
+      const ICON = {
+        chev: '<svg viewBox="0 0 16 16" width="12" height="12"><path d="M6 3.5l4.5 4.5L6 12.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+        folder: '<svg viewBox="0 0 16 16" width="16" height="16"><path d="M1.5 4a1 1 0 011-1h3.3l1.4 1.6h6.3a1 1 0 011 1V12a1 1 0 01-1 1h-11a1 1 0 01-1-1z" fill="currentColor"/></svg>',
+        file: '<svg viewBox="0 0 16 16" width="16" height="16"><path d="M4 1.8h5l3.4 3.4v8.6a.5.5 0 01-.5.5H4a.5.5 0 01-.5-.5V2.3a.5.5 0 01.5-.5z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M9 1.8v3.6h3.4" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M5.6 8.5h4.8M5.6 10.6h4.8" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>'
+      };
+      const row = (cls, depth, icon, label, open) => {
+        const b = el("button", "trow " + cls + (open ? " open" : "")); b.type = "button"; b.style.setProperty("--d", String(depth));
+        const c = el("span", "tc"); if (open !== undefined) c.innerHTML = ICON.chev;
+        const i = el("span", "ti"); i.innerHTML = icon;
+        b.append(c, i, el("span", "nm", label)); return b;
+      };
+      const rootOpen = !treeClosed.has("");
+      const rootRow = row("dir root", 0, ICON.folder, project ? project.name : "Folder", rootOpen);
+      rootRow.onclick = () => { if (treeClosed.has("")) treeClosed.delete(""); else treeClosed.add(""); renderFolder(); };
+      box.append(rootRow);
+      if (!rootOpen) return;
       let prev = [];
       list.forEach((d) => {
         const dirs = d.path.split("/").slice(0, -1);
         let k = 0; while (k < dirs.length && k < prev.length && dirs[k] === prev[k]) k++;
-        for (let j = k; j < dirs.length; j++) { const r = el("div", "fdir", "▾ " + dirs[j]); r.style.setProperty("--d", String(j)); box.append(r); }
+        const closedAt = (n) => { for (let j = 0; j < n; j++) if (treeClosed.has(dirs.slice(0, j + 1).join("/"))) return true; return false; };
+        for (let j = k; j < dirs.length; j++) {
+          if (closedAt(j)) continue;
+          const key = dirs.slice(0, j + 1).join("/"), open = !treeClosed.has(key);
+          const r = row("dir", j + 1, ICON.folder, dirs[j], open);
+          r.onclick = () => { if (treeClosed.has(key)) treeClosed.delete(key); else treeClosed.add(key); renderFolder(); };
+          box.append(r);
+        }
         prev = dirs;
-        const b = el("button", "file tr" + (d.cpy ? " cp" : "")); b.type = "button"; b.style.setProperty("--d", String(dirs.length)); b.setAttribute("aria-current", String(docs[active] === d));
+        if (closedAt(dirs.length)) return;
+        const b = row("file" + (d.cpy ? " cp" : ""), dirs.length + 1, ICON.file, d.name + (isDirty(d) ? "  ●" : "")); b.setAttribute("aria-current", String(docs[active] === d));
         const st = docState(d), mark = el("span", "fs " + st[0], st[1]); if (st[2]) mark.title = st[2];
-        b.append(el("span", "fi", d.cpy ? "CPY" : "CBL"), el("span", "nm", d.name + (isDirty(d) ? "  ●" : "")), mark);
+        b.append(mark);
         if (d.cpy) b.title = "Copybook: filled into programs that COPY it"; else if (st[2]) b.title = st[2];
         b.onclick = () => openFolderDoc(d); box.append(b);
       });
