@@ -124,7 +124,12 @@ SYSTEM = (
     "declared size. Translate each of these exactly, so a one-character value prints with no padding.\n"
     "14. DISPLAY of a figurative numeric constant prints its numeric character, not its COBOL name: "
     "DISPLAY ZERO prints 0 (never the word ZERO). ZERO, ZEROES and ZEROES are numeric zero values; "
-    "preserve the COBOL statement's display width and formatting."
+    "preserve the COBOL statement's display width and formatting.\n"
+    "15. INSPECT ... TALLYING adds to the counter's CURRENT value; it does not set it to zero first. "
+    "If the COBOL does not MOVE 0 (or INITIALIZE) to the counter before an INSPECT, the count keeps "
+    "accumulating every time the INSPECT runs (for example inside a PERFORM VARYING loop over several "
+    "records), so the Java must NOT reset the counter either. Reset the Java counter only at the points "
+    "where the COBOL resets it."
 )
 
 _client = None
@@ -258,14 +263,14 @@ def _prepare_child_dir(tmpdir):
     return tmpdir
 
 
-def _child_preexec():
+def _child_preexec(address_space=1 << 30):
     if os.name != "posix":
         return None
     import resource
 
     def setup():
         resource.setrlimit(resource.RLIMIT_CPU, (30, 30))
-        resource.setrlimit(resource.RLIMIT_AS, (1 << 30, 1 << 30))
+        resource.setrlimit(resource.RLIMIT_AS, (address_space, address_space))
         resource.setrlimit(resource.RLIMIT_NPROC, (256, 256))
         resource.setrlimit(resource.RLIMIT_FSIZE, (5 << 20, 5 << 20))
         resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
@@ -277,12 +282,12 @@ def _child_preexec():
     return setup
 
 
-def run(cmd, stdin=None, cwd=None, timeout=30, tmpdir=None):
+def run(cmd, stdin=None, cwd=None, timeout=30, tmpdir=None, address_space=1 << 30):
     """Run one child with a bounded capture, scrubbed environment and OS limits."""
     home = _prepare_child_dir(tmpdir or cwd or tempfile.gettempdir())
     proc = subprocess.Popen(cmd, stdin=subprocess.PIPE if stdin is not None else subprocess.DEVNULL,
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd,
-                            env=child_env(home), preexec_fn=_child_preexec(),
+                            env=child_env(home), preexec_fn=_child_preexec(address_space),
                             start_new_session=(os.name == "posix"))
     captured = {"stdout": bytearray(), "stderr": bytearray()}
     exceeded = set()
@@ -415,39 +420,94 @@ def run_java_tests(java_src, wd, tests, expected):
                 "tests": []}
     _prepare_child_dir(wd)
     (wd / "Main.java").write_text(java_src)
-    rc, _, err = run(["javac", "Main.java"], cwd=wd, timeout=60, tmpdir=wd)
+    rc, out, err = run(["javac", "-J-Xmx256m", "-J-XX:+UseSerialGC",
+                        "-J-XX:CompressedClassSpaceSize=128m",
+                        "-J-XX:ActiveProcessorCount=2", "Main.java"],
+                       cwd=wd, timeout=60, tmpdir=wd, address_space=2 << 30)
     if rc != 0:
-        return {"compile_error": err.strip()[:1200], "tests": []}
+        compile_error = err.strip() or out.strip() or f"javac exited with status {rc}"
+        return {"compile_error": compile_error[:1200], "tests": []}
     out = []
     for i, (t, exp) in enumerate(zip(tests, expected), 1):
-        rc, o, e = run(["java", "-Xmx256m", "-cp", str(wd), "Main"], stdin=t,
-                       timeout=20, cwd=wd, tmpdir=wd)
+        rc, o, e = run(["java", "-Xmx256m", "-XX:+UseSerialGC",
+                       "-XX:CompressedClassSpaceSize=128m", "-XX:ActiveProcessorCount=2",
+                       "-cp", str(wd), "Main"], stdin=t,
+                       timeout=20, cwd=wd, tmpdir=wd, address_space=2 << 30)
         act = norm(o)
         out.append({"i": i, "ok": rc == 0 and act == exp, "stdin": t[:300],
                     "expected": exp, "actual": act,
+                    "diff_details": exact_line_diff(exp, act) if rc == 0 and act != exp else [],
                     "error": e.strip()[:800] if rc != 0 else None})
     return {"compile_error": None, "tests": out}
 
 
-def line_diff(exp, act, max_show=8):
-    """Line-by-line difference for the model: how many lines differ and the first few pairs."""
+def line_diff(exp, act, max_show=16):
+    """Difference for the model, aligned like diff: one extra or missing line is reported as that,
+    not as every following line being different."""
+    import difflib
     e, a = exp.split("\n"), act.split("\n")
-    n = max(len(e), len(a))
-    bad = [i for i in range(n) if (e[i] if i < len(e) else None) != (a[i] if i < len(a) else None)]
-    out = [f"{len(bad)} of {n} output lines differ (COBOL printed {len(e)} lines, Java printed {len(a)})."]
-    for i in bad[:max_show]:
-        out.append(f"line {i + 1}:\n  EXPECTED (COBOL): {show(e[i], 220) if i < len(e) else '(no such line)'}"
-                   f"\n  ACTUAL (Java):   {show(a[i], 220) if i < len(a) else '(no such line)'}")
-    if len(bad) > max_show:
-        out.append(f"... and {len(bad) - max_show} more differing lines.")
+    ops = difflib.SequenceMatcher(None, e, a, autojunk=False).get_opcodes()
+    matched = sum(i2 - i1 for tag, i1, i2, j1, j2 in ops if tag == "equal")
+    items = []
+    for tag, i1, i2, j1, j2 in ops:
+        if tag == "insert":
+            items.append(f"Java printed {j2 - j1} EXTRA line(s) at Java line {j1 + 1}, before COBOL line "
+                         f"{i1 + 1}, which COBOL did not print: {show(a[j1], 220)}")
+        elif tag == "delete":
+            items.append(f"Java did NOT print {i2 - i1} line(s) that COBOL printed at COBOL line {i1 + 1}: "
+                         f"{show(e[i1], 220)}")
+        elif tag == "replace":
+            n = min(i2 - i1, j2 - j1)
+            for k in range(n):
+                items.append(f"line {i1 + k + 1}:\n  EXPECTED (COBOL): {show(e[i1 + k], 220)}"
+                             f"\n  ACTUAL (Java):   {show(a[j1 + k], 220)}")
+            if i2 - i1 > n:
+                items.append(f"Java did NOT print {i2 - i1 - n} line(s) from COBOL line {i1 + n + 1}: "
+                             f"{show(e[i1 + n], 220)}")
+            elif j2 - j1 > n:
+                items.append(f"Java printed {j2 - j1 - n} EXTRA line(s) at Java line {j1 + n + 1}: "
+                             f"{show(a[j1 + n], 220)}")
+    out = [f"{matched} of {len(e)} COBOL output lines appear in the Java output in the same order "
+           f"(COBOL printed {len(e)} lines, Java printed {len(a)})."]
+    out += items[:max_show]
+    if len(items) > max_show:
+        out.append(f"... and {len(items) - max_show} more differing lines.")
     return "\n".join(out)
+
+
+def exact_line_diff(expected, actual):
+    """Details for differing output lines, including visible whitespace."""
+    expected_lines, actual_lines = expected.split("\n"), actual.split("\n")
+    details = []
+    for i in range(max(len(expected_lines), len(actual_lines))):
+        left = expected_lines[i] if i < len(expected_lines) else ""
+        right = actual_lines[i] if i < len(actual_lines) else ""
+        if i < len(expected_lines) and i < len(actual_lines) and left == right:
+            continue
+
+        def exact(text):
+            visible = text.replace("\t", "⇥").replace(" ", "·")
+            if text.endswith((" ", "\t")):
+                visible += " ⟵ trailing whitespace"
+            return f"exact: {visible} ({len(text)} chars)"
+
+        detail = {"line": i, "expected_exact": exact(left), "actual_exact": exact(right)}
+        if re.sub(r"[ \t]", "", left) == re.sub(r"[ \t]", "", right) and left != right:
+            detail["note"] = (f"whitespace differs: COBOL {len(left)} chars, "
+                              f"Java {len(right)} chars")
+        details.append(detail)
+    return details
 
 
 def feedback(d):
     """(ok, message-for-the-model) from run_java_tests output."""
-    if d["compile_error"]:
-        return False, "javac error:\n" + d["compile_error"]
-    for r in d["tests"]:
+    compile_error = d.get("compile_error")
+    if compile_error:
+        return False, "javac error:\n" + compile_error
+    tests = d.get("tests")
+    if not isinstance(tests, list) or not tests:
+        return False, "No inputs were compared; cannot verify this Java program."
+    for r in tests:
         if r["error"]:
             return False, f"Java runtime error on test {r['i']}:\n{r['error']}"
         if not r["ok"]:
@@ -487,6 +547,7 @@ def solve_tier(tier, cobol, tests, expected, wd, fix_rounds, last_tier=True, on_
     msgs = base
     rec = {"tier": tier, "model": model, "rounds": [], "tin": 0, "tout": 0,
            "secs": 0.0, "solved": False, "java": None}
+    no_think_next = False  # set after a reply was cut off: the next try must not spend tokens on thinking
     for _ in range(fix_rounds + 1):
         if deadline and time.time() > deadline:
             rec["stopped"] = "time"
@@ -496,6 +557,8 @@ def solve_tier(tier, cobol, tests, expected, wd, fix_rounds, last_tier=True, on_
         log(f"{cob_name_ctx()} -> {tier}: calling model (round {rnd})")
         ev(type="model_call", round=rnd, model=model)
         think = THINK_MODE == "on" or (THINK_MODE == "auto" and last_tier and rnd >= 3)
+        if no_think_next:
+            think, no_think_next = False, False
         try:
             r = chat(model, msgs, cap_for(tier), think=think,
                      on_progress=lambda n, s, rnd=rnd: ev(type="progress", round=rnd, tokens=n, secs=int(s)))
@@ -519,10 +582,15 @@ def solve_tier(tier, cobol, tests, expected, wd, fix_rounds, last_tier=True, on_
                 log(f"{cob_name_ctx()} {tier}: hit token cap -> escalating")
                 ev(type="note", text="hit the token or time limit: escalating to the next model")
                 return rec
-            ev(type="note", text="hit the token or time limit: retrying with a shorter-reasoning prompt")
-            msgs = base[:1] + [{"role": "user", "content": (
-                "Translate this COBOL program to Java. Think briefly, then output only "
-                f"the final Main.java in one ```java block.\n\n{cobol}")}]
+            no_think_next = True
+            if msgs is base:
+                ev(type="note", text="hit the token or time limit: retrying with a shorter-reasoning prompt")
+                msgs = base[:1] + [{"role": "user", "content": (
+                    "Translate this COBOL program to Java. Think briefly, then output only "
+                    f"the final Main.java in one ```java block.\n\n{cobol}")}]
+            else:
+                # keep the last Java and its difference list; only the thinking is dropped
+                ev(type="note", text="hit the token or time limit: retrying the same fix without extended thinking")
         else:
             java = extract_java(r["text"])
             if java is None:

@@ -1539,6 +1539,20 @@
       min-height: 20px
     }
 
+    .exact {
+      color: var(--fg3);
+      font-size: 11px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere
+    }
+
+    .dwhitespace {
+      grid-column: 1 / -1;
+      padding: 0 52px 4px;
+      color: var(--warn);
+      font: 11px/16px var(--ui)
+    }
+
     .dr.bad .dc:first-child {
       background: var(--del-bg)
     }
@@ -3148,7 +3162,14 @@
         c1.append(el("div", "dn", a[i] === undefined ? "" : String(i + 1)), dcell(a[i], b[i], bad));
         c2.append(el("div", "dn", b[i] === undefined ? "" : String(i + 1)));
         if (S.pending) { const w = el("div", "dt"); if (i === 0) w.append(el("span", "dwait", "Waiting for the Java")); c2.append(w); } else c2.append(dcell(b[i], a[i], bad));
-        row.append(c1, c2); diff.append(row);
+        row.append(c1, c2);
+        const detail = bad && t.diff_details && t.diff_details.find((x) => x.line === i);
+        if (detail) {
+          c1.lastChild.append(el("div", "exact", detail.expected_exact));
+          c2.lastChild.append(el("div", "exact", detail.actual_exact));
+          if (detail.note) row.append(el("div", "dwhitespace", detail.note));
+        }
+        diff.append(row);
       }
       if (!S.pending) box.append(el("p", "sumline", same + " of " + n + " output lines match" + (S.tests.length > 1 ? " on input " + (S.sel + 1) : "")));
       box.append(diff);
