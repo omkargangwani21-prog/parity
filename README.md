@@ -5,6 +5,8 @@ GnuCOBOL's output is the answer key. The agent loops: translate, run, diff, fix.
 
 Built for the Nebius x NVIDIA Global AI Hackathon (Coding & Agentic Engineering).
 
+**Live demo:** https://parity-6ypb.onrender.com (free hosting: the first load after idle can take 30-60 seconds to wake up; model calls stop when the demo budget is used up).
+
 ## Why
 COBOL still runs a large share of banking and government batch work, and the people
 who can read it are retiring. Translating it is the easy part. Knowing the Java
